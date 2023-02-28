@@ -29,10 +29,13 @@
 </script>
 
 <button on:click={reset}>Reset entries</button>
-<label for="entry">Entry</label>
-<input name="entry" id="entry" type="text" bind:value={entry} />
 
-<button on:click={submit}>Add entry</button>
+<form on:submit|preventDefault={submit}>
+	<label for="entry">Entry</label>
+	<input name="entry" id="entry" type="text" bind:value={entry} />
+
+	<button>Add entry</button>
+</form>
 
 {#each decodedState as contentItem}
 	<Entry state={contentItem} />
