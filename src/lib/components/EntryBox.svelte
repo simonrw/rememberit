@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { content } from '$lib/state/localstorage';
 	import Entry from '$lib/components/Entry.svelte';
-	import type { StructuredEntity } from '$lib/StructuredEntity';
+	import { sortEntities, type StructuredEntity } from '$lib/StructuredEntity';
 
 	let entry = '';
 
 	function submit() {
 		const structuredEntry: StructuredEntity = {
-			content: entry
+			content: entry,
+			created: new Date()
 		};
 		content.update((state) => {
 			try {
@@ -24,7 +25,7 @@
 		content.set('[]');
 	}
 
-	$: decodedState = JSON.parse($content);
+	$: decodedState = JSON.parse($content).sort(sortEntities).reverse();
 </script>
 
 <button on:click={reset}>Reset entries</button>
