@@ -1,11 +1,14 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
-const config: PlaywrightTestConfig = {
-	webServer: {
-		command: 'npm run build && npm run preview',
-		port: 4173
-	},
-	testDir: 'tests'
-};
-
-export default config;
+export default defineConfig({
+  use: {
+    launchOptions: {
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM,
+    },
+  },
+  webServer: {
+    command: 'npm run build && npm run preview',
+    port: 4173,
+  },
+  testDir: 'tests'
+});
