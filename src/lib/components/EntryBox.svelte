@@ -37,6 +37,8 @@
 	<button>Add entry</button>
 </form>
 
-{#each decodedState as contentItem}
-	<Entry state={contentItem} />
-{/each}
+<div>
+	{#each decodedState as contentItem}
+		<Entry state={contentItem} />
+	{/each}
+</div>
