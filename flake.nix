@@ -25,6 +25,7 @@
               playwright
               elmPackages.elm
               elmPackages.elm-format
+              elmPackages.elm-live
             ];
 
             env = {
