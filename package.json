@@ -1,0 +1,19 @@
+{
+  "name": "rememberit",
+  "version": "1.0.0",
+  "description": "When did that thing happen? RememberIt is a simple note taking app that lets you jot down notes for yourself in a quick way so that you remember when things happen.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "elm": "elm",
+    "dev": "elm-live -- src/Main.elm --debug"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "elm": "^0.19.1-6",
+    "elm-format": "^0.8.7",
+    "elm-live": "^4.0.2"
+  }
+}
