@@ -24,6 +24,7 @@
             buildInputs = with pkgs; [
               playwright
               elmPackages.elm
+              elmPackages.elm-format
             ];
 
             env = {
