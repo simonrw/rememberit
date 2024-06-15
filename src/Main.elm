@@ -1,33 +1,61 @@
 module Main exposing (Msg(..), main, update, view)
 
 import Browser
-import Html exposing (button, div, h1, input, label, text)
-import Html.Attributes exposing (style)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, h1, input, label, p, text)
+import Html.Attributes exposing (style, value)
+import Html.Events exposing (onClick, onInput)
 
 
-main : Program () Int Msg
+type alias Entry =
+    { id : String
+    , content : String
+    , created : String
+    }
+
+
+type alias Model =
+    { entries : List Entry
+    , currentText : String
+    }
+
+
+main : Program () Model Msg
 main =
-    Browser.sandbox { init = 0, update = update, view = view }
+    Browser.sandbox { init = init, update = update, view = view }
+
+
+init : Model
+init =
+    -- TODO: get from localstorage
+    { entries = []
+    , currentText = ""
+    }
 
 
 type Msg
-    = Increment
-    | Decrement
+    = UpdateCurrentText String
+    | AddEntry
 
 
-update : Msg -> number -> number
+update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Increment ->
-            model + 1
+        UpdateCurrentText newText ->
+            { model | currentText = newText }
 
-        Decrement ->
-            model - 1
+        AddEntry ->
+            let
+                newEntry =
+                    { id = ""
+                    , content = model.currentText
+                    , created = ""
+                    }
+            in
+            { model | entries = model.entries ++ [ newEntry ], currentText = "" }
 
 
-view : Int -> Html.Html Msg
-view _ =
+view : Model -> Html Msg
+view model =
     div [ style "padding" "1em" ]
         [ h1 [] [ text "RememberIt" ]
         , div []
@@ -35,7 +63,23 @@ view _ =
             ]
         , div []
             [ label [] [ text "Entry" ]
-            , input [] []
-            , button [] [ text "Add entry" ]
+            , input [ onInput UpdateCurrentText, value model.currentText ] []
+            , button [ onClick AddEntry ] [ text "Add entry" ]
             ]
+        , div []
+            (viewEntries model.entries)
         ]
+
+
+viewEntries : List Entry -> List (Html Msg)
+viewEntries entries =
+    List.map viewEntry entries
+
+
+viewEntry : Entry -> Html Msg
+viewEntry entry =
+    let
+        s =
+            entry.created ++ " " ++ entry.content
+    in
+    p [] [ text s ]
