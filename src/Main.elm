@@ -21,15 +21,17 @@ type alias Model =
 
 main : Program () Model Msg
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element { init = init, update = update, view = view, subscriptions = \_ -> Sub.none }
 
 
-init : Model
-init =
+init : () -> ( Model, Cmd Msg )
+init _ =
     -- TODO: get from localstorage
-    { entries = []
-    , currentText = ""
-    }
+    ( { entries = []
+      , currentText = ""
+      }
+    , Cmd.none
+    )
 
 
 type Msg
@@ -38,10 +40,12 @@ type Msg
 
 
 update : Msg -> Model -> Model
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UpdateCurrentText newText ->
-            { model | currentText = newText }
+            ( { model | currentText = newText }, Cmd.none )
 
         AddEntry ->
             let
@@ -51,7 +55,7 @@ update msg model =
                     , created = ""
                     }
             in
-            { model | entries = model.entries ++ [ newEntry ], currentText = "" }
+            ( { model | entries = model.entries ++ [ newEntry ], currentText = "" }, Cmd.none )
 
 
 view : Model -> Html Msg
