@@ -4,11 +4,31 @@ import Browser
 import Html exposing (Html, button, div, h1, input, label, p, text)
 import Html.Attributes exposing (style, value)
 import Html.Events exposing (onClick, onInput)
+import Random
+import UUID exposing (UUID)
+
+
+
+-- new model flow
+-- -> button triggers new model request (AddEntry)
+-- -> new model request triggers uuid generation (GenerateEntryId)
+-- -> new model added to the state (AppendEntry)
+
+
+newEntry : NewEntry -> Cmd Msg
+newEntry n =
+    Random.generate (AppendEntry n) UUID.generator
 
 
 type alias Entry =
-    { id : String
+    { id : UUID
     , content : String
+    , created : String
+    }
+
+
+type alias NewEntry =
+    { content : String
     , created : String
     }
 
@@ -36,10 +56,14 @@ init _ =
 
 type Msg
     = UpdateCurrentText String
-    | AddEntry
+      -- new entry flow
+    | TriggerAddEntry
+    | AppendEntry NewEntry UUID
 
 
-update : Msg -> Model -> Model
+
+-- | NewUUID UUID
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -47,15 +71,24 @@ update msg model =
         UpdateCurrentText newText ->
             ( { model | currentText = newText }, Cmd.none )
 
-        AddEntry ->
+        TriggerAddEntry ->
             let
-                newEntry =
-                    { id = ""
-                    , content = model.currentText
+                n =
+                    { content = model.currentText
                     , created = ""
                     }
             in
-            ( { model | entries = model.entries ++ [ newEntry ], currentText = "" }, Cmd.none )
+            ( model, newEntry n )
+
+        AppendEntry n id ->
+            let
+                entry =
+                    { id = id
+                    , content = n.content
+                    , created = n.created
+                    }
+            in
+            ( { model | entries = model.entries ++ [ entry ] }, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -68,7 +101,7 @@ view model =
         , div []
             [ label [] [ text "Entry" ]
             , input [ onInput UpdateCurrentText, value model.currentText ] []
-            , button [ onClick AddEntry ] [ text "Add entry" ]
+            , button [ onClick TriggerAddEntry ] [ text "Add entry" ]
             ]
         , div []
             (viewEntries model.entries)
