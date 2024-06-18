@@ -222,7 +222,7 @@ content model =
 
 entriesList : Model -> Element Msg
 entriesList model =
-    column [] <| viewEntries model.entries
+    column [ width fill ] <| viewEntries model.entries
 
 
 viewEntries : List Entry -> List (Element Msg)
@@ -234,6 +234,16 @@ viewEntry : Entry -> Element Msg
 viewEntry entry =
     let
         s =
-            entry.created ++ " " ++ entry.content
+            entry.created ++ " " ++ entry.content ++ " (" ++ UUID.toString entry.id ++ ")"
     in
-    el [] (text s)
+    row
+        [ spacingXY 50 0
+        , width fill
+        ]
+        [ el [ width fill ] (text s)
+        , Input.button
+            []
+            { onPress = Nothing
+            , label = text "Duplicate"
+            }
+        ]
