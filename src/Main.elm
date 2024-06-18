@@ -109,6 +109,7 @@ init maybeEntries =
 
 type Msg
     = UpdateCurrentText String
+    | ResetEntries
       -- new entry flow
     | TriggerAddEntry
     | AppendEntry NewEntry UUID
@@ -145,6 +146,9 @@ update msg model =
                     model.entries ++ [ entry ]
             in
             ( { model | entries = newEntries }, saveEntries newEntries )
+
+        ResetEntries ->
+            ( { model | entries = [] }, saveEntries [] )
 
 
 view : Model -> Html Msg
@@ -208,7 +212,7 @@ content model =
         ]
         [ Input.button
             []
-            { onPress = Nothing
+            { onPress = Just ResetEntries
             , label = text "Reset entries"
             }
         , inputForm
