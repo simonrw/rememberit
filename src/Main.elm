@@ -1,9 +1,9 @@
 module Main exposing (Msg(..), main, update, view)
 
 import Browser
-import Html exposing (Html, button, div, h1, input, label, p, text)
-import Html.Attributes exposing (style, value)
-import Html.Events exposing (onClick, onInput)
+import Element exposing (..)
+import Element.Input as Input
+import Html exposing (Html)
 import Random
 import UUID exposing (UUID)
 
@@ -78,7 +78,7 @@ update msg model =
                     , created = ""
                     }
             in
-            ( model, newEntry n )
+            ( { model | currentText = "" }, newEntry n )
 
         AppendEntry n id ->
             let
@@ -93,30 +93,60 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ style "padding" "1em" ]
-        [ h1 [] [ text "RememberIt" ]
-        , div []
-            [ button [] [ text "Reset entries" ]
+    Element.layout [ explain Debug.todo ] <|
+        column [ width fill ]
+            [ header
+            , content model
             ]
-        , div []
-            [ label [] [ text "Entry" ]
-            , input [ onInput UpdateCurrentText, value model.currentText ] []
-            , button [ onClick TriggerAddEntry ] [ text "Add entry" ]
-            ]
-        , div []
-            (viewEntries model.entries)
+
+
+header : Element Msg
+header =
+    row [] [ text "RememberIt" ]
+
+
+content : Model -> Element Msg
+content model =
+    let
+        inputForm =
+            row []
+                [ Input.text []
+                    { onChange = UpdateCurrentText
+                    , text = model.currentText
+                    , placeholder = Nothing
+                    , label = Input.labelLeft [] (text "Entry")
+                    }
+                , Input.button []
+                    { onPress = Just TriggerAddEntry
+                    , label = text "Add entry"
+                    }
+                ]
+    in
+    column []
+        [ Input.button
+            []
+            { onPress = Nothing
+            , label = text "Reset entries"
+            }
+        , inputForm
+        , entriesList model
         ]
 
 
-viewEntries : List Entry -> List (Html Msg)
+entriesList : Model -> Element Msg
+entriesList model =
+    column [] <| viewEntries model.entries
+
+
+viewEntries : List Entry -> List (Element Msg)
 viewEntries entries =
     List.map viewEntry entries
 
 
-viewEntry : Entry -> Html Msg
+viewEntry : Entry -> Element Msg
 viewEntry entry =
     let
         s =
             entry.created ++ " " ++ entry.content
     in
-    p [] [ text s ]
+    el [] (text s)
