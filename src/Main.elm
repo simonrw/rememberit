@@ -4,6 +4,8 @@ import Browser
 import Element exposing (..)
 import Element.Input as Input
 import Html exposing (Html)
+import Html.Events
+import Json.Decode as D
 import Random
 import UUID exposing (UUID)
 
@@ -94,7 +96,11 @@ update msg model =
 view : Model -> Html Msg
 view model =
     Element.layout [ explain Debug.todo ] <|
-        column [ width fill ]
+        column
+            [ width fill
+            , padding 20
+            , spacing 20
+            ]
             [ header
             , content model
             ]
@@ -102,15 +108,35 @@ view model =
 
 header : Element Msg
 header =
-    row [] [ text "RememberIt" ]
+    el [] (text "RememberIt")
 
 
 content : Model -> Element Msg
 content model =
     let
+        onEnter msg =
+            Element.htmlAttribute
+                (Html.Events.on "keyup"
+                    (D.field "key" D.string
+                        |> D.andThen
+                            (\key ->
+                                if key == "Enter" then
+                                    D.succeed msg
+
+                                else
+                                    D.fail "Not the enter key"
+                            )
+                    )
+                )
+    in
+    let
         inputForm =
-            row []
-                [ Input.text []
+            row [ width fill ]
+                [ Input.text
+                    [ width fill
+                    , Input.focusedOnLoad
+                    , onEnter TriggerAddEntry
+                    ]
                     { onChange = UpdateCurrentText
                     , text = model.currentText
                     , placeholder = Nothing
@@ -122,7 +148,10 @@ content model =
                     }
                 ]
     in
-    column []
+    column
+        [ width fill
+        , spacing 20
+        ]
         [ Input.button
             []
             { onPress = Nothing
