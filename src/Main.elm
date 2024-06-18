@@ -1,4 +1,4 @@
-module Main exposing (Msg(..), main, update, view)
+port module Main exposing (Msg(..), main, update, view)
 
 import Browser
 import Element exposing (..)
@@ -6,8 +6,32 @@ import Element.Input as Input
 import Html exposing (Html)
 import Html.Events
 import Json.Decode as D
+import Json.Encode as E
 import Random
 import UUID exposing (UUID)
+
+
+
+-- ports
+
+
+port storeEntries : String -> Cmd msg
+
+
+saveEntries : List Entry -> Cmd msg
+saveEntries entries =
+    E.list entryEncoder entries
+        |> E.encode 0
+        |> storeEntries
+
+
+entryEncoder : Entry -> E.Value
+entryEncoder entry =
+    E.object
+        [ ( "id", E.string (UUID.toString entry.id) )
+        , ( "content", E.string entry.content )
+        , ( "created", E.string entry.created )
+        ]
 
 
 
@@ -41,15 +65,42 @@ type alias Model =
     }
 
 
-main : Program () Model Msg
+main : Program (Maybe String) Model Msg
 main =
-    Browser.element { init = init, update = update, view = view, subscriptions = \_ -> Sub.none }
+    Browser.element
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = \_ -> Sub.none
+        }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    -- TODO: get from localstorage
-    ( { entries = []
+init : Maybe String -> ( Model, Cmd Msg )
+init maybeEntries =
+    let
+        entryDecoder : D.Decoder Entry
+        entryDecoder =
+            D.map3 Entry
+                (D.at [ "id" ] UUID.jsonDecoder)
+                (D.at [ "content" ] D.string)
+                (D.at [ "created" ] D.string)
+
+        entriesDecoder : D.Decoder (List Entry)
+        entriesDecoder =
+            D.list entryDecoder
+
+        decodeEntries text =
+            case D.decodeString entriesDecoder text of
+                Ok entries ->
+                    entries
+
+                Err _ ->
+                    []
+    in
+    ( { entries =
+            maybeEntries
+                |> Maybe.map decodeEntries
+                |> Maybe.withDefault []
       , currentText = ""
       }
     , Cmd.none
@@ -89,8 +140,11 @@ update msg model =
                     , content = n.content
                     , created = n.created
                     }
+
+                newEntries =
+                    model.entries ++ [ entry ]
             in
-            ( { model | entries = model.entries ++ [ entry ] }, Cmd.none )
+            ( { model | entries = newEntries }, saveEntries newEntries )
 
 
 view : Model -> Html Msg
