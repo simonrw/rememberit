@@ -4,6 +4,7 @@ import Browser
 import Browser.Events
 import Dict exposing (Dict)
 import Element exposing (..)
+import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
 import Html.Events
@@ -15,6 +16,16 @@ import Task
 import Time exposing (Month(..), Zone)
 import UI
 import UUID exposing (UUID)
+
+
+
+-- sizing
+
+
+scaled : Int -> Int
+scaled rescale =
+    Element.modular 16 1.25 rescale
+        |> round
 
 
 
@@ -262,7 +273,7 @@ view model =
 
 header : Element Msg
 header =
-    el [] (text "RememberIt")
+    el [ Font.size (scaled 4) ] (text "RememberIt")
 
 
 content : Model -> Element Msg
