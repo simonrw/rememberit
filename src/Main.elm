@@ -8,6 +8,8 @@ import Html.Events
 import Json.Decode as D
 import Json.Encode as E
 import Random
+import Task
+import Time exposing (Month(..), Zone)
 import UUID exposing (UUID)
 
 
@@ -30,8 +32,14 @@ entryEncoder entry =
     E.object
         [ ( "id", E.string (UUID.toString entry.id) )
         , ( "content", E.string entry.content )
-        , ( "created", E.string entry.created )
+        , ( "created", E.int <| Time.posixToMillis entry.created // 1000 )
         ]
+
+
+getTimeForEntry : String -> UUID -> Cmd Msg
+getTimeForEntry s id =
+    Time.now
+        |> Task.perform (AppendEntry s id)
 
 
 
@@ -41,27 +49,22 @@ entryEncoder entry =
 -- -> new model added to the state (AppendEntry)
 
 
-newEntry : NewEntry -> Cmd Msg
-newEntry n =
-    Random.generate (AppendEntry n) UUID.generator
+newEntry : String -> Cmd Msg
+newEntry s =
+    Random.generate (GetTimeForEntry s) UUID.generator
 
 
 type alias Entry =
     { id : UUID
     , content : String
-    , created : String
-    }
-
-
-type alias NewEntry =
-    { content : String
-    , created : String
+    , created : Time.Posix
     }
 
 
 type alias Model =
     { entries : List Entry
     , currentText : String
+    , zone : Maybe Zone
     }
 
 
@@ -75,6 +78,11 @@ main =
         }
 
 
+fetchCurrentZone : Cmd Msg
+fetchCurrentZone =
+    Time.here |> Task.perform GotZone
+
+
 init : Maybe String -> ( Model, Cmd Msg )
 init maybeEntries =
     let
@@ -83,7 +91,7 @@ init maybeEntries =
             D.map3 Entry
                 (D.at [ "id" ] UUID.jsonDecoder)
                 (D.at [ "content" ] D.string)
-                (D.at [ "created" ] D.string)
+                (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix (t * 1000)) D.int)
 
         entriesDecoder : D.Decoder (List Entry)
         entriesDecoder =
@@ -102,44 +110,98 @@ init maybeEntries =
                 |> Maybe.map decodeEntries
                 |> Maybe.withDefault []
       , currentText = ""
+      , zone = Nothing
       }
-    , Cmd.none
+    , fetchCurrentZone
     )
 
 
 type Msg
     = UpdateCurrentText String
     | ResetEntries
+    | GotZone Zone
       -- new entry flow
     | TriggerAddEntry
-    | AppendEntry NewEntry UUID
+    | GetTimeForEntry String UUID
+    | AppendEntry String UUID Time.Posix
 
 
+printMonth : Month -> String
+printMonth month =
+    case month of
+        Jan ->
+            "01"
 
--- | NewUUID UUID
+        Feb ->
+            "02"
+
+        Mar ->
+            "03"
+
+        Apr ->
+            "04"
+
+        May ->
+            "05"
+
+        Jun ->
+            "06"
+
+        Jul ->
+            "07"
+
+        Aug ->
+            "08"
+
+        Sep ->
+            "09"
+
+        Oct ->
+            "10"
+
+        Nov ->
+            "11"
+
+        Dec ->
+            "12"
+
+
+toUtcString : Time.Posix -> Zone -> String
+toUtcString time zone =
+    String.fromInt (Time.toYear zone time)
+        ++ "/"
+        ++ (Time.toMonth zone time |> printMonth)
+        ++ "/"
+        ++ String.fromInt (Time.toDay zone time)
+        ++ " "
+        ++ String.fromInt (Time.toHour zone time)
+        ++ ":"
+        ++ String.fromInt (Time.toMinute zone time)
+        ++ ":"
+        ++ String.fromInt (Time.toSecond zone time)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        GotZone zone ->
+            ( { model | zone = Just zone }, Cmd.none )
+
         UpdateCurrentText newText ->
             ( { model | currentText = newText }, Cmd.none )
 
         TriggerAddEntry ->
-            let
-                n =
-                    { content = model.currentText
-                    , created = ""
-                    }
-            in
-            ( { model | currentText = "" }, newEntry n )
+            ( { model | currentText = "" }, newEntry model.currentText )
 
-        AppendEntry n id ->
+        GetTimeForEntry n id ->
+            ( model, getTimeForEntry n id )
+
+        AppendEntry s id t ->
             let
                 entry =
                     { id = id
-                    , content = n.content
-                    , created = n.created
+                    , content = s
+                    , created = t
                     }
 
                 newEntries =
@@ -222,19 +284,24 @@ content model =
 
 entriesList : Model -> Element Msg
 entriesList model =
-    column [ width fill ] <| viewEntries model.entries
+    let
+        zone =
+            Maybe.withDefault Time.utc model.zone
+    in
+    column [ width fill ] <|
+        viewEntries model.entries zone
 
 
-viewEntries : List Entry -> List (Element Msg)
-viewEntries entries =
-    List.map viewEntry entries
+viewEntries : List Entry -> Zone -> List (Element Msg)
+viewEntries entries zone =
+    List.map (viewEntry zone) entries
 
 
-viewEntry : Entry -> Element Msg
-viewEntry entry =
+viewEntry : Zone -> Entry -> Element Msg
+viewEntry zone entry =
     let
         s =
-            entry.created ++ " " ++ entry.content ++ " (" ++ UUID.toString entry.id ++ ")"
+            toUtcString entry.created zone ++ ": " ++ entry.content
     in
     row
         [ spacingXY 50 0
