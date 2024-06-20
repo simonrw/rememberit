@@ -8,6 +8,7 @@ import Html.Events
 import Json.Decode as D
 import Json.Encode as E
 import Random
+import String exposing (isEmpty)
 import Task
 import Time exposing (Month(..), Zone)
 import UUID exposing (UUID)
@@ -192,7 +193,11 @@ update msg model =
             ( { model | currentText = newText }, Cmd.none )
 
         TriggerAddEntry ->
-            ( { model | currentText = "" }, newEntry model.currentText )
+            if isEmpty model.currentText then
+                ( model, Cmd.none )
+
+            else
+                ( { model | currentText = "" }, newEntry model.currentText )
 
         GetTimeForEntry n id ->
             ( model, getTimeForEntry n id )
