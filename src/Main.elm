@@ -12,6 +12,7 @@ import Random
 import String exposing (isEmpty)
 import Task
 import Time exposing (Month(..), Zone)
+import UI
 import UUID exposing (UUID)
 
 
@@ -234,6 +235,7 @@ view model =
             [ width fill
             , padding 20
             , spacing 20
+            , explain Debug.todo
             ]
             [ header
             , content model
@@ -276,7 +278,7 @@ content model =
                     , placeholder = Nothing
                     , label = Input.labelLeft [] (text "Entry")
                     }
-                , Input.button []
+                , UI.button []
                     { onPress = Just TriggerAddEntry
                     , label = text "Add entry"
                     }
@@ -286,7 +288,7 @@ content model =
         [ width fill
         , spacing 20
         ]
-        [ Input.button
+        [ UI.button
             []
             { onPress = Just ResetEntries
             , label = text "Reset entries"
@@ -387,7 +389,7 @@ viewEntry zone entry =
         , width fill
         ]
         [ el [ width fill ] (text s)
-        , Input.button
+        , UI.button
             []
             { onPress = Just (DuplicateEntry entry)
             , label = text "Duplicate"
