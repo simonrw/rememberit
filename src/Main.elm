@@ -296,11 +296,12 @@ content model =
     in
     let
         inputForm =
-            row [ width fill ]
+            row [ width fill, spacing 16 ]
                 [ Input.text
                     [ width fill
                     , Input.focusedOnLoad
                     , onEnter TriggerAddEntry
+                    , spacing 16
                     ]
                     { onChange = UpdateCurrentText
                     , text = model.currentText
