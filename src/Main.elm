@@ -286,6 +286,17 @@ content model =
         ]
 
 
+sortEntries : List Entry -> List Entry
+sortEntries entries =
+    let
+        extractTimeInt e =
+            e.created
+                |> Time.posixToMillis
+    in
+    List.sortBy extractTimeInt entries
+        |> List.reverse
+
+
 entriesList : Model -> Element Msg
 entriesList model =
     let
@@ -293,7 +304,7 @@ entriesList model =
             Maybe.withDefault Time.utc model.zone
     in
     column [ width fill ] <|
-        viewEntries model.entries zone
+        viewEntries (sortEntries model.entries) zone
 
 
 viewEntries : List Entry -> Zone -> List (Element Msg)
