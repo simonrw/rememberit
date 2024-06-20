@@ -1,6 +1,7 @@
 port module Main exposing (Msg(..), main, update, view)
 
 import Browser
+import Browser.Events
 import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Input as Input
@@ -68,16 +69,19 @@ type alias Model =
     { entries : List Entry
     , currentText : String
     , zone : Maybe Zone
+    , device : Device
     }
 
 
-main : Program (Maybe String) Model Msg
+main : Program Flags Model Msg
 main =
     Browser.element
         { init = init
         , update = update
         , view = view
-        , subscriptions = \_ -> Sub.none
+        , subscriptions =
+            \_ ->
+                Browser.Events.onResize (\w h -> WindowResized w h)
         }
 
 
@@ -86,9 +90,19 @@ fetchCurrentZone =
     Time.here |> Task.perform GotZone
 
 
-init : Maybe String -> ( Model, Cmd Msg )
-init maybeEntries =
+type alias Flags =
+    { initialRawState : Maybe String
+    , windowHeight : Int
+    , windowWidth : Int
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init { initialRawState, windowHeight, windowWidth } =
     let
+        device =
+            classifyDevice { height = windowHeight, width = windowWidth }
+
         entryDecoder : D.Decoder Entry
         entryDecoder =
             D.map3 Entry
@@ -109,11 +123,12 @@ init maybeEntries =
                     []
     in
     ( { entries =
-            maybeEntries
+            initialRawState
                 |> Maybe.map decodeEntries
                 |> Maybe.withDefault []
       , currentText = ""
       , zone = Nothing
+      , device = device
       }
     , fetchCurrentZone
     )
@@ -125,6 +140,7 @@ type Msg
     | GotZone Zone
     | DuplicateEntry Entry
     | QuickAddItem String
+    | WindowResized Int Int
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -189,6 +205,9 @@ toUtcString time zone =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        WindowResized w h ->
+            ( { model | device = classifyDevice { width = w, height = h } }, Cmd.none )
+
         GotZone zone ->
             ( { model | zone = Just zone }, Cmd.none )
 
