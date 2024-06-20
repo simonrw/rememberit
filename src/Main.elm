@@ -254,7 +254,6 @@ view model =
             [ width fill
             , padding 20
             , spacing 20
-            , explain Debug.todo
             ]
             [ header
             , content model

@@ -23,9 +23,7 @@ button extraAttrs defn =
             buttonAttrs ++ []
 
         attrs =
-            Debug.log "Button attributes"
-                (defaultAttrs
-                    ++ extraAttrs
-                )
+            defaultAttrs
+                ++ extraAttrs
     in
     Input.button attrs defn
