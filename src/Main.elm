@@ -120,6 +120,7 @@ type Msg
     = UpdateCurrentText String
     | ResetEntries
     | GotZone Zone
+    | DuplicateEntry Entry
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -208,6 +209,9 @@ update msg model =
                     model.entries ++ [ entry ]
             in
             ( { model | entries = newEntries }, saveEntries newEntries )
+
+        DuplicateEntry entry ->
+            ( model, newEntry entry.content )
 
         ResetEntries ->
             ( { model | entries = [] }, saveEntries [] )
@@ -310,7 +314,7 @@ viewEntry zone entry =
         [ el [ width fill ] (text s)
         , Input.button
             []
-            { onPress = Nothing
+            { onPress = Just (DuplicateEntry entry)
             , label = text "Duplicate"
             }
         ]
