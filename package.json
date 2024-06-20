@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "elm": "elm",
-    "dev": "elm-live -- src/Main.elm --debug --output elm.js"
+    "dev": "elm-live -- src/Main.elm --debug --output elm.js",
+    "build": "elm make src/Main.elm --optimize --output elm.js"
   },
   "keywords": [],
   "author": "",
