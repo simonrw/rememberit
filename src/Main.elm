@@ -1,6 +1,7 @@
 port module Main exposing (Msg(..), main, update, view)
 
 import Browser
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Input as Input
 import Html exposing (Html)
@@ -122,6 +123,7 @@ type Msg
     | ResetEntries
     | GotZone Zone
     | DuplicateEntry Entry
+    | QuickAddItem String
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -218,6 +220,9 @@ update msg model =
         DuplicateEntry entry ->
             ( model, newEntry entry.content )
 
+        QuickAddItem name ->
+            ( model, newEntry name )
+
         ResetEntries ->
             ( { model | entries = [] }, saveEntries [] )
 
@@ -286,9 +291,63 @@ content model =
             { onPress = Just ResetEntries
             , label = text "Reset entries"
             }
+        , viewQuickAddEntries model
         , inputForm
         , entriesList model
         ]
+
+
+countItems : List Entry -> Dict String Int
+countItems entries =
+    let
+        countFn : Entry -> Dict String Int -> Dict String Int
+        countFn new acc =
+            case Dict.get new.content acc of
+                Just e ->
+                    Dict.insert new.content (e + 1) acc
+
+                Nothing ->
+                    Dict.insert new.content 1 acc
+    in
+    List.foldl countFn Dict.empty entries
+
+
+createQuickAddItems : Model -> List (Element Msg)
+createQuickAddItems model =
+    let
+        filterFn _ count =
+            count > 4
+    in
+    countItems model.entries
+        |> Dict.filter filterFn
+        |> Dict.toList
+        |> List.sortBy (\( _, v ) -> v)
+        |> List.reverse
+        |> List.map (\( i, count ) -> createQuickAddItem i count)
+
+
+createQuickAddItem : String -> Int -> Element Msg
+createQuickAddItem name count =
+    UI.button []
+        { onPress = Just (QuickAddItem name)
+        , label = text (name ++ " (" ++ String.fromInt count ++ ")")
+        }
+
+
+viewQuickAddEntries : Model -> Element Msg
+viewQuickAddEntries model =
+    let
+        quickAddItems =
+            createQuickAddItems model
+    in
+    if List.isEmpty quickAddItems then
+        Element.none
+
+    else
+        column [ spacingXY 0 15 ]
+            [ Element.el [] (text "Quick add")
+            , wrappedRow [ spacing 10 ] quickAddItems
+            ]
 
 
 sortEntries : List Entry -> List Entry
