@@ -23,6 +23,10 @@
           empty = pkgs.mkShell {
             buildInputs = with pkgs; [
               playwright
+              nodejs
+              # elmPackages.elm
+              # elmPackages.elm-format
+              # elmPackages.elm-live
             ];
 
             env = {

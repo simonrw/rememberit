@@ -26,8 +26,16 @@ jobs:
         with:
           node-version: 16
           cache: npm
+      - name: Clean slate
+        run: |
+          rm -rf build
+          rm -f elm.js
       - run: npm ci
       - run: npm run build
+      - run: |
+          mkdir build
+          mv elm.js build/elm.js
+          cp index.html build/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
