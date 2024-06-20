@@ -219,7 +219,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Element.layout [ explain Debug.todo ] <|
+    Element.layout [] <|
         column
             [ width fill
             , padding 20
