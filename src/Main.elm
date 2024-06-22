@@ -385,13 +385,14 @@ createQuickAddItems : Model -> List (Element Msg)
 createQuickAddItems model =
     let
         filterFn _ count =
-            count > 4
+            count >= 2
     in
     countItems model.entries
         |> Dict.filter filterFn
         |> Dict.toList
         |> List.sortBy (\( _, v ) -> v)
         |> List.reverse
+        |> List.take 5
         |> List.map (\( i, count ) -> createQuickAddItem i count)
 
 
