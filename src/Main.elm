@@ -81,6 +81,7 @@ type alias Model =
     , currentText : String
     , zone : Maybe Zone
     , device : Device
+    , editingEntry : Maybe Entry
     }
 
 
@@ -140,6 +141,7 @@ init { initialRawState, windowHeight, windowWidth } =
       , currentText = ""
       , zone = Nothing
       , device = device
+      , editingEntry = Nothing
       }
     , fetchCurrentZone
     )
@@ -152,6 +154,9 @@ type Msg
     | DuplicateEntry Entry
     | QuickAddItem String
     | WindowResized Int Int
+    | TriggerUpdateEntry Entry
+    | FinishedEditing
+    | UpdateEditingEntry String
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -256,6 +261,38 @@ update msg model =
 
         ResetEntries ->
             ( { model | entries = [] }, saveEntries [] )
+
+        TriggerUpdateEntry original ->
+            ( { model | editingEntry = Just original }, Cmd.none )
+
+        FinishedEditing ->
+            case model.editingEntry of
+                Just e ->
+                    let
+                        nonEditedEntries =
+                            List.filter (\entry -> entry.id /= e.id) model.entries
+
+                        newEntriesList =
+                            nonEditedEntries ++ [ e ]
+                    in
+                    ( { model | editingEntry = Nothing, entries = newEntriesList }, saveEntries newEntriesList )
+
+                Nothing ->
+                    -- TODO: programming error
+                    ( model, Cmd.none )
+
+        UpdateEditingEntry text ->
+            case model.editingEntry of
+                Just e ->
+                    let
+                        new =
+                            { e | content = text }
+                    in
+                    ( { model | editingEntry = Just new }, Cmd.none )
+
+                Nothing ->
+                    -- TODO: programming error
+                    ( model, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -400,28 +437,70 @@ entriesList model =
             Maybe.withDefault Time.utc model.zone
     in
     column [ width fill ] <|
-        viewEntries (sortEntries model.entries) zone
+        viewEntries (sortEntries model.entries) zone model.editingEntry
 
 
-viewEntries : List Entry -> Zone -> List (Element Msg)
-viewEntries entries zone =
-    List.map (viewEntry zone) entries
+viewEntries : List Entry -> Zone -> Maybe Entry -> List (Element Msg)
+viewEntries entries zone editingEntry =
+    List.map (viewEntry zone editingEntry) entries
 
 
-viewEntry : Zone -> Entry -> Element Msg
-viewEntry zone entry =
+viewEntry : Zone -> Maybe Entry -> Entry -> Element Msg
+viewEntry zone editingEntry entry =
     let
         s =
             toUtcString entry.created zone ++ ": " ++ entry.content
+
+        editing =
+            case editingEntry of
+                Just e ->
+                    e.id == entry.id
+
+                Nothing ->
+                    False
+
+        entryContent =
+            if editing then
+                editingContent
+
+            else
+                normalContent
+
+        editingContent =
+            [ Input.text
+                [ width fill
+                ]
+                { onChange = UpdateEditingEntry
+                , text =
+                    editingEntry
+                        |> Maybe.map (\e -> e.content)
+                        |> Maybe.withDefault ""
+                , placeholder = Nothing
+                , label = Input.labelLeft [] (text "Entry")
+                }
+            , UI.button
+                []
+                { onPress = Just FinishedEditing
+                , label = text "Done"
+                }
+            ]
+
+        normalContent =
+            [ el [ width fill ] (text s)
+            , UI.button
+                []
+                { onPress = Just (DuplicateEntry entry)
+                , label = text "Duplicate"
+                }
+            , UI.button
+                []
+                { onPress = Just (TriggerUpdateEntry entry)
+                , label = text "Update"
+                }
+            ]
     in
     row
         [ spacingXY 50 0
         , width fill
         ]
-        [ el [ width fill ] (text s)
-        , UI.button
-            []
-            { onPress = Just (DuplicateEntry entry)
-            , label = text "Duplicate"
-            }
-        ]
+        entryContent
