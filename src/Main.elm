@@ -7,6 +7,7 @@ import Element exposing (..)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
+import Html.Attributes as Attrs
 import Html.Events
 import Json.Decode as D
 import Json.Encode as E
@@ -157,6 +158,7 @@ type Msg
     | TriggerUpdateEntry Entry
     | FinishedEditing
     | UpdateEditingEntry String
+    | UpdateEditingTime String
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -216,6 +218,22 @@ toUtcString time zone =
         ++ String.fromInt (Time.toMinute zone time)
         ++ ":"
         ++ String.fromInt (Time.toSecond zone time)
+
+
+datePicker : Time.Posix -> Element Msg
+datePicker value =
+    let
+        timeForDatePicker : Time.Posix -> String
+        timeForDatePicker _ =
+            "2018-06-12T19:30"
+    in
+    Html.input
+        [ Attrs.type_ "datetime-local"
+        , Attrs.value <| timeForDatePicker value
+        , Html.Events.onInput UpdateEditingTime
+        ]
+        []
+        |> Element.html
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -287,6 +305,23 @@ update msg model =
                     let
                         new =
                             { e | content = text }
+                    in
+                    ( { model | editingEntry = Just new }, Cmd.none )
+
+                Nothing ->
+                    -- TODO: programming error
+                    ( model, Cmd.none )
+
+        UpdateEditingTime text ->
+            case model.editingEntry of
+                Just e ->
+                    let
+                        posixTime =
+                            -- TODO
+                            Time.millisToPosix 0
+
+                        new =
+                            { e | created = posixTime }
                     in
                     ( { model | editingEntry = Just new }, Cmd.none )
 
@@ -468,7 +503,12 @@ viewEntry zone editingEntry entry =
                 normalContent
 
         editingContent =
-            [ Input.text
+            [ datePicker
+                (editingEntry
+                    |> Maybe.map (\e -> e.created)
+                    |> Maybe.withDefault (Time.millisToPosix 0)
+                )
+            , Input.text
                 [ width fill
                 ]
                 { onChange = UpdateEditingEntry
