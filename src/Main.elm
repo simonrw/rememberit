@@ -274,7 +274,7 @@ datePicker : Time.Zone -> Time.Posix -> Element Msg
 datePicker zone time =
     Html.input
         [ Attrs.type_ "datetime-local"
-        , Attrs.value <| Debug.log "got time" <| datetimePickerDatetime zone time
+        , Attrs.value <| datetimePickerDatetime zone time
         , Html.Events.onInput UpdateEditingTime
         ]
         []
@@ -373,9 +373,6 @@ update msg model =
             case model.editingEntry of
                 Just current ->
                     let
-                        _ =
-                            Debug.log "got milliseconds" millis
-
                         newEntry =
                             { current | created = Time.millisToPosix millis }
                     in
@@ -384,21 +381,6 @@ update msg model =
                 Nothing ->
                     -- TODO: programming error
                     ( model, Cmd.none )
-
-
-
--- send the time to JavaScript along with the timezone to convert to posix milliseconds in UTC
--- case model.zone of
---     Just zone ->
---         let
---             sendTimeForConversion : Cmd Msg
---             sendTimeForConversion =
---                 Cmd.none
---         in
---         ( model, sendTimeForConversion )
---     Nothing ->
---         -- TODO programming error
---         ( model, Cmd.none )
 
 
 view : Model -> Html Msg
