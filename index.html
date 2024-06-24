@@ -34,6 +34,14 @@
                 localStorage.setItem("entries", entriesJson);
                 console.log("Saved state: ", entriesJson);
             });
+
+            app.ports.convertTime.subscribe(payload => {
+                const { text, zoneName } = JSON.parse(payload);
+                console.log(`parsing text: ${text}`);
+                const result = Date.parse(text)
+                console.log(`got result: ${result}`);
+                app.ports.timeConversionResult.send(result);
+            });
         </script>
     </body>
 </html>

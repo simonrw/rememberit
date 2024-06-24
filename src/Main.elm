@@ -7,13 +7,14 @@ import Element exposing (..)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
+import Html.Attributes as Attrs
 import Html.Events
 import Json.Decode as D
 import Json.Encode as E
 import Random
-import String exposing (isEmpty)
+import String exposing (fromInt, isEmpty)
 import Task
-import Time exposing (Month(..), Zone)
+import Time exposing (Month(..), Zone, ZoneName(..))
 import UI
 import UUID exposing (UUID)
 
@@ -47,7 +48,7 @@ entryEncoder entry =
     E.object
         [ ( "id", E.string (UUID.toString entry.id) )
         , ( "content", E.string entry.content )
-        , ( "created", E.int <| Time.posixToMillis entry.created // 1000 )
+        , ( "created", E.int <| Time.posixToMillis entry.created )
         ]
 
 
@@ -58,14 +59,39 @@ getTimeForEntry s id =
 
 
 
+-- time conversion
+
+
+port convertTime : String -> Cmd msg
+
+
+port timeConversionResult : (Int -> msg) -> Sub msg
+
+
+sendTimeForConversion : ZoneName -> String -> Cmd msg
+sendTimeForConversion zoneName datestr =
+    case zoneName of
+        Name name ->
+            E.object
+                [ ( "text", E.string datestr )
+                , ( "zoneName", E.string name )
+                ]
+                |> E.encode 0
+                |> convertTime
+
+        Offset _ ->
+            Cmd.none
+
+
+
 -- new model flow
 -- -> button triggers new model request (AddEntry)
 -- -> new model request triggers uuid generation (GenerateEntryId)
 -- -> new model added to the state (AppendEntry)
 
 
-newEntry : String -> Cmd Msg
-newEntry s =
+createNewEntry : String -> Cmd Msg
+createNewEntry s =
     Random.generate (GetTimeForEntry s) UUID.generator
 
 
@@ -80,6 +106,7 @@ type alias Model =
     { entries : List Entry
     , currentText : String
     , zone : Maybe Zone
+    , zoneName : Maybe ZoneName
     , device : Device
     , editingEntry : Maybe Entry
     }
@@ -93,13 +120,21 @@ main =
         , view = view
         , subscriptions =
             \_ ->
-                Browser.Events.onResize (\w h -> WindowResized w h)
+                Sub.batch
+                    [ Browser.Events.onResize (\w h -> WindowResized w h)
+                    , timeConversionResult TimeConversionResultReceived
+                    ]
         }
 
 
 fetchCurrentZone : Cmd Msg
 fetchCurrentZone =
     Time.here |> Task.perform GotZone
+
+
+fetchCurrentZoneName : Cmd Msg
+fetchCurrentZoneName =
+    Time.getZoneName |> Task.perform GotZoneName
 
 
 type alias Flags =
@@ -120,7 +155,7 @@ init { initialRawState, windowHeight, windowWidth } =
             D.map3 Entry
                 (D.at [ "id" ] UUID.jsonDecoder)
                 (D.at [ "content" ] D.string)
-                (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix (t * 1000)) D.int)
+                (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix t) D.int)
 
         entriesDecoder : D.Decoder (List Entry)
         entriesDecoder =
@@ -140,10 +175,14 @@ init { initialRawState, windowHeight, windowWidth } =
                 |> Maybe.withDefault []
       , currentText = ""
       , zone = Nothing
+      , zoneName = Nothing
       , device = device
       , editingEntry = Nothing
       }
-    , fetchCurrentZone
+    , Cmd.batch
+        [ fetchCurrentZone
+        , fetchCurrentZoneName
+        ]
     )
 
 
@@ -151,12 +190,15 @@ type Msg
     = UpdateCurrentText String
     | ResetEntries
     | GotZone Zone
+    | GotZoneName ZoneName
     | DuplicateEntry Entry
     | QuickAddItem String
     | WindowResized Int Int
     | TriggerUpdateEntry Entry
     | FinishedEditing
     | UpdateEditingEntry String
+    | UpdateEditingTime String
+    | TimeConversionResultReceived Int
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -203,19 +245,40 @@ printMonth month =
             "12"
 
 
-toUtcString : Time.Posix -> Zone -> String
-toUtcString time zone =
+padWithLeadingZeroes : String -> String
+padWithLeadingZeroes =
+    String.pad 2 '0'
+
+
+datetimePickerDatetime : Zone -> Time.Posix -> String
+datetimePickerDatetime zone time =
     String.fromInt (Time.toYear zone time)
-        ++ "/"
+        ++ "-"
         ++ (Time.toMonth zone time |> printMonth)
-        ++ "/"
-        ++ String.fromInt (Time.toDay zone time)
-        ++ " "
-        ++ String.fromInt (Time.toHour zone time)
+        ++ "-"
+        ++ (String.fromInt (Time.toDay zone time) |> padWithLeadingZeroes)
+        ++ "T"
+        ++ (String.fromInt (Time.toHour zone time) |> padWithLeadingZeroes)
         ++ ":"
-        ++ String.fromInt (Time.toMinute zone time)
+        ++ (String.fromInt (Time.toMinute zone time) |> padWithLeadingZeroes)
+
+
+toUtcString : Zone -> Time.Posix -> String
+toUtcString zone time =
+    datetimePickerDatetime zone time
         ++ ":"
-        ++ String.fromInt (Time.toSecond zone time)
+        ++ (String.fromInt (Time.toSecond zone time) |> padWithLeadingZeroes)
+
+
+datePicker : Time.Zone -> Time.Posix -> Element Msg
+datePicker zone time =
+    Html.input
+        [ Attrs.type_ "datetime-local"
+        , Attrs.value <| Debug.log "got time" <| datetimePickerDatetime zone time
+        , Html.Events.onInput UpdateEditingTime
+        ]
+        []
+        |> Element.html
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -227,6 +290,9 @@ update msg model =
         GotZone zone ->
             ( { model | zone = Just zone }, Cmd.none )
 
+        GotZoneName zoneName ->
+            ( { model | zoneName = Just zoneName }, Cmd.none )
+
         UpdateCurrentText newText ->
             ( { model | currentText = newText }, Cmd.none )
 
@@ -235,7 +301,7 @@ update msg model =
                 ( model, Cmd.none )
 
             else
-                ( { model | currentText = "" }, newEntry model.currentText )
+                ( { model | currentText = "" }, createNewEntry model.currentText )
 
         GetTimeForEntry n id ->
             ( model, getTimeForEntry n id )
@@ -254,10 +320,10 @@ update msg model =
             ( { model | entries = newEntries }, saveEntries newEntries )
 
         DuplicateEntry entry ->
-            ( model, newEntry entry.content )
+            ( model, createNewEntry entry.content )
 
         QuickAddItem name ->
-            ( model, newEntry name )
+            ( model, createNewEntry name )
 
         ResetEntries ->
             ( { model | entries = [] }, saveEntries [] )
@@ -293,6 +359,46 @@ update msg model =
                 Nothing ->
                     -- TODO: programming error
                     ( model, Cmd.none )
+
+        UpdateEditingTime text ->
+            case model.zoneName of
+                Just zoneName ->
+                    ( model, sendTimeForConversion zoneName text )
+
+                Nothing ->
+                    -- TODO :programming error
+                    ( model, Cmd.none )
+
+        TimeConversionResultReceived millis ->
+            case model.editingEntry of
+                Just current ->
+                    let
+                        _ =
+                            Debug.log "got milliseconds" millis
+
+                        newEntry =
+                            { current | created = Time.millisToPosix millis }
+                    in
+                    ( { model | editingEntry = Just newEntry }, Cmd.none )
+
+                Nothing ->
+                    -- TODO: programming error
+                    ( model, Cmd.none )
+
+
+
+-- send the time to JavaScript along with the timezone to convert to posix milliseconds in UTC
+-- case model.zone of
+--     Just zone ->
+--         let
+--             sendTimeForConversion : Cmd Msg
+--             sendTimeForConversion =
+--                 Cmd.none
+--         in
+--         ( model, sendTimeForConversion )
+--     Nothing ->
+--         -- TODO programming error
+--         ( model, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -450,7 +556,7 @@ viewEntry : Zone -> Maybe Entry -> Entry -> Element Msg
 viewEntry zone editingEntry entry =
     let
         s =
-            toUtcString entry.created zone ++ ": " ++ entry.content
+            toUtcString zone entry.created ++ ": " ++ entry.content
 
         editing =
             case editingEntry of
@@ -468,7 +574,13 @@ viewEntry zone editingEntry entry =
                 normalContent
 
         editingContent =
-            [ Input.text
+            [ datePicker
+                zone
+                (editingEntry
+                    |> Maybe.map (\e -> e.created)
+                    |> Maybe.withDefault (Time.millisToPosix 0)
+                )
+            , Input.text
                 [ width fill
                 ]
                 { onChange = UpdateEditingEntry
