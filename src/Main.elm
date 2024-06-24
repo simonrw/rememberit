@@ -114,6 +114,8 @@ type alias Model =
     , zoneName : Maybe ZoneName
     , device : Device
     , editingEntry : Maybe Entry
+    , importPanelOpen : Bool
+    , importContent : String
     }
 
 
@@ -183,6 +185,8 @@ init { initialRawState, windowHeight, windowWidth } =
       , zoneName = Nothing
       , device = device
       , editingEntry = Nothing
+      , importPanelOpen = False
+      , importContent = ""
       }
     , Cmd.batch
         [ fetchCurrentZone
@@ -205,6 +209,7 @@ type Msg
     | UpdateEditingTime String
     | TimeConversionResultReceived Int
     | SaveToClipboard
+    | ToggleImportPanel
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -391,6 +396,9 @@ update msg model =
         SaveToClipboard ->
             ( model, saveToClipboard () )
 
+        ToggleImportPanel ->
+            ( { model | importPanelOpen = True }, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
@@ -462,6 +470,11 @@ content model =
                 []
                 { onPress = Just SaveToClipboard
                 , label = text "Export entries"
+                }
+            , UI.button
+                []
+                { onPress = Just ToggleImportPanel
+                , label = text "Import entries"
                 }
             ]
         , viewQuickAddEntries model
