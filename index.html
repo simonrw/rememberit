@@ -24,6 +24,16 @@
             });
 
             // set up ports
+            app.ports.saveToClipboard.subscribe(async (input) => {
+                console.log("saving to clipboard");
+
+                const entriesText = localStorage.getItem("entries");
+                const type = "text/plain";
+                const blob = new Blob([entriesText], { type });
+                const data = [new ClipboardItem({ [type]: blob })];
+                await navigator.clipboard.write(data);
+            });
+
             app.ports.storeEntries.subscribe(input => {
                 if (input.length === 0) {
                     console.error("no events found");

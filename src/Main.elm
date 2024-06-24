@@ -33,6 +33,9 @@ scaled rescale =
 -- ports
 
 
+port saveToClipboard : () -> Cmd msg
+
+
 port storeEntries : String -> Cmd msg
 
 
@@ -199,6 +202,7 @@ type Msg
     | UpdateEditingEntry String
     | UpdateEditingTime String
     | TimeConversionResultReceived Int
+    | SaveToClipboard
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -382,6 +386,9 @@ update msg model =
                     -- TODO: programming error
                     ( model, Cmd.none )
 
+        SaveToClipboard ->
+            ( model, saveToClipboard () )
+
 
 view : Model -> Html Msg
 view model =
@@ -443,11 +450,18 @@ content model =
         [ width fill
         , spacing 20
         ]
-        [ UI.button
-            []
-            { onPress = Just ResetEntries
-            , label = text "Reset entries"
-            }
+        [ row [ spacingXY 20 0 ]
+            [ UI.button
+                []
+                { onPress = Just ResetEntries
+                , label = text "Reset entries"
+                }
+            , UI.button
+                []
+                { onPress = Just SaveToClipboard
+                , label = text "Export entries"
+                }
+            ]
         , viewQuickAddEntries model
         , inputForm
         , entriesList model
