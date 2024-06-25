@@ -130,18 +130,11 @@ type alias Entry =
     }
 
 
-type alias ImportState =
-    { zone : Zone
-    , zoneName : ZoneName
-    , device : Device
-    }
-
-
 type Model
     = Init Flags
     | WithTimeZone Flags Zone
     | EntriesList EntriesListState
-    | Import ImportState String
+    | Import EntriesListState String
 
 
 type alias EntriesListState =
@@ -211,6 +204,7 @@ type Msg
       -- import state
     | ImportTextChanged String
     | ImportContent
+    | CancelImport
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -423,19 +417,12 @@ update msg fullModel =
                     ( fullModel, saveToClipboard () )
 
                 ToggleImportPanel ->
-                    let
-                        importState =
-                            { zone = model.zone
-                            , zoneName = model.zoneName
-                            , device = model.device
-                            }
-                    in
-                    ( Import importState "", Cmd.none )
+                    ( Import model "", Cmd.none )
 
                 _ ->
                     ( fullModel, Cmd.none )
 
-        importUpdate : ImportState -> String -> ( Model, Cmd Msg )
+        importUpdate : EntriesListState -> String -> ( Model, Cmd Msg )
         importUpdate s raw =
             case msg of
                 ImportTextChanged t ->
@@ -460,6 +447,9 @@ update msg fullModel =
                         }
                     , saveEntries newEntries
                     )
+
+                CancelImport ->
+                    ( EntriesList s, Cmd.none )
 
                 _ ->
                     ( fullModel, Cmd.none )
@@ -531,6 +521,10 @@ importView value =
         , UI.button []
             { onPress = Just ImportContent
             , label = text "Import content"
+            }
+        , UI.button []
+            { onPress = Just CancelImport
+            , label = text "Cancel"
             }
         ]
 
