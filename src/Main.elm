@@ -195,6 +195,7 @@ type Msg
     | QuickAddItem String
     | WindowResized Int Int
     | TriggerUpdateEntry Entry
+    | DeleteEntry Entry
     | FinishedEditing
     | UpdateEditingEntry String
     | UpdateEditingTime String
@@ -367,6 +368,14 @@ update msg fullModel =
 
                 TriggerUpdateEntry original ->
                     ( EntriesList { model | editingEntry = Just original }, Cmd.none )
+
+                DeleteEntry original ->
+                    let
+                        keepFn : Entry -> Bool
+                        keepFn e =
+                            e.id /= original.id
+                    in
+                    ( EntriesList { model | entries = List.filter keepFn model.entries }, Cmd.none )
 
                 FinishedEditing ->
                     case model.editingEntry of
@@ -742,6 +751,11 @@ viewEntry device zone editingEntry entry =
                                 []
                                 { onPress = Just (TriggerUpdateEntry entry)
                                 , label = text "Update"
+                                }
+                            , UI.button
+                                []
+                                { onPress = Just (DeleteEntry entry)
+                                , label = text "Delete"
                                 }
                             ]
                         ]
