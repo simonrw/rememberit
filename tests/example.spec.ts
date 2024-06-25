@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { v4 as uuidv4 } from 'uuid';
 
 test('has title', async ({ page }) => {
   await page.goto("/");
@@ -7,12 +8,12 @@ test('has title', async ({ page }) => {
   await expect(page).toHaveTitle(/RememberIt/);
 });
 
-// test('get started link', async ({ page }) => {
-//   await page.goto("/");
+test('adding entry', async ({ page }) => {
+  await page.goto("/");
+  const content = `test ${uuidv4()}`;
+  await page.getByLabel("Entry").fill(content);
+  await page.getByRole("button", { name: "Add entry" }).click();
 
-//   // Click the get started link.
-//   await page.getByRole('link', { name: 'Get started' }).click();
-
-//   // Expects page to have a heading with the name of Installation.
-//   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
-// });
+  const entry = page.getByText(content);
+  await expect(entry).toBeVisible();
+});
