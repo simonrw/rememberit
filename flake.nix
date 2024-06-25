@@ -22,17 +22,18 @@
 
           empty = pkgs.mkShell {
             buildInputs = with pkgs; [
-              playwright
               nodejs
               # elmPackages.elm
               # elmPackages.elm-format
               # elmPackages.elm-live
-            ];
+            ] ++ lib.optionals pkgs.stdenv.isLinux (with pkgs; [
+              playwright
+            ]);
 
-            env = {
+            env = {} // (pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
               PLAYWRIGHT_BROWSERS_PATH = pkgs.playwright-driver.browsers;
               PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = true;
-            };
+            });
           };
         };
       }
