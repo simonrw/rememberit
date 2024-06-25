@@ -374,8 +374,11 @@ update msg fullModel =
                         keepFn : Entry -> Bool
                         keepFn e =
                             e.id /= original.id
+
+                        newEntries =
+                            List.filter keepFn model.entries
                     in
-                    ( EntriesList { model | entries = List.filter keepFn model.entries }, Cmd.none )
+                    ( EntriesList { model | entries = newEntries }, saveEntries newEntries )
 
                 FinishedEditing ->
                     case model.editingEntry of
