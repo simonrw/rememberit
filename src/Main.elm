@@ -16,7 +16,7 @@ import Json.Encode as E
 import Random
 import String exposing (isEmpty)
 import Task
-import Time exposing (Month(..), Zone, ZoneName(..), getZoneName)
+import Time exposing (Month(..), Zone, ZoneName(..))
 import UI
 import UUID exposing (UUID)
 
@@ -63,6 +63,29 @@ getTimeForEntry s id =
         |> Task.perform (AppendEntry s id)
 
 
+entryDecoder : D.Decoder Entry
+entryDecoder =
+    D.map3 Entry
+        (D.at [ "id" ] UUID.jsonDecoder)
+        (D.at [ "content" ] D.string)
+        (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix t) D.int)
+
+
+entriesDecoder : D.Decoder (List Entry)
+entriesDecoder =
+    D.list entryDecoder
+
+
+decodeEntries : String -> List Entry
+decodeEntries text =
+    case D.decodeString entriesDecoder text of
+        Ok entries ->
+            entries
+
+        Err _ ->
+            []
+
+
 
 -- time conversion
 
@@ -107,10 +130,18 @@ type alias Entry =
     }
 
 
+type alias ImportState =
+    { zone : Zone
+    , zoneName : ZoneName
+    , device : Device
+    }
+
+
 type Model
     = Init Flags
     | WithTimeZone Flags Zone
     | EntriesList EntriesListState
+    | Import ImportState String
 
 
 type alias EntriesListState =
@@ -162,47 +193,6 @@ init flags =
     ( Init flags, fetchCurrentZone )
 
 
-
--- init : Flags -> ( Model, Cmd Msg )
--- init { initialRawState, windowHeight, windowWidth } =
---     let
---         device =
---             classifyDevice { height = windowHeight, width = windowWidth }
---         entryDecoder : D.Decoder Entry
---         entryDecoder =
---             D.map3 Entry
---                 (D.at [ "id" ] UUID.jsonDecoder)
---                 (D.at [ "content" ] D.string)
---                 (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix t) D.int)
---         entriesDecoder : D.Decoder (List Entry)
---         entriesDecoder =
---             D.list entryDecoder
---         decodeEntries text =
---             case D.decodeString entriesDecoder text of
---                 Ok entries ->
---                     entries
---                 Err _ ->
---                     []
---     in
---     ( { entries =
---             initialRawState
---                 |> Maybe.map decodeEntries
---                 |> Maybe.withDefault []
---       , currentText = ""
---       , zone = Nothing
---       , zoneName = Nothing
---       , device = device
---       , editingEntry = Nothing
---       , importPanelOpen = False
---       , importContent = ""
---       }
---     , Cmd.batch
---         [ fetchCurrentZone
---         , fetchCurrentZoneName
---         ]
---     )
-
-
 type Msg
     = UpdateCurrentText String
     | ResetEntries
@@ -218,6 +208,9 @@ type Msg
     | TimeConversionResultReceived Int
     | SaveToClipboard
     | ToggleImportPanel
+      -- import state
+    | ImportTextChanged String
+    | ImportContent
       -- new entry flow
     | TriggerAddEntry
     | GetTimeForEntry String UUID
@@ -317,25 +310,6 @@ update msg fullModel =
                     let
                         device =
                             classifyDevice { height = windowHeight, width = windowWidth }
-
-                        entryDecoder : D.Decoder Entry
-                        entryDecoder =
-                            D.map3 Entry
-                                (D.at [ "id" ] UUID.jsonDecoder)
-                                (D.at [ "content" ] D.string)
-                                (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix t) D.int)
-
-                        entriesDecoder : D.Decoder (List Entry)
-                        entriesDecoder =
-                            D.list entryDecoder
-
-                        decodeEntries text =
-                            case D.decodeString entriesDecoder text of
-                                Ok entries ->
-                                    entries
-
-                                Err _ ->
-                                    []
                     in
                     ( EntriesList
                         { entries =
@@ -449,7 +423,43 @@ update msg fullModel =
                     ( fullModel, saveToClipboard () )
 
                 ToggleImportPanel ->
-                    ( EntriesList { model | importPanelOpen = True }, Cmd.none )
+                    let
+                        importState =
+                            { zone = model.zone
+                            , zoneName = model.zoneName
+                            , device = model.device
+                            }
+                    in
+                    ( Import importState "", Cmd.none )
+
+                _ ->
+                    ( fullModel, Cmd.none )
+
+        importUpdate : ImportState -> String -> ( Model, Cmd Msg )
+        importUpdate s raw =
+            case msg of
+                ImportTextChanged t ->
+                    ( Import s t, Cmd.none )
+
+                ImportContent ->
+                    let
+                        newEntries =
+                            D.decodeString D.string raw
+                                |> Result.map decodeEntries
+                                |> Result.withDefault []
+                    in
+                    ( EntriesList
+                        { entries = newEntries
+                        , currentText = ""
+                        , zone = s.zone
+                        , zoneName = s.zoneName
+                        , device = s.device
+                        , editingEntry = Nothing
+                        , importPanelOpen = False
+                        , importContent = ""
+                        }
+                    , saveEntries newEntries
+                    )
 
                 _ ->
                     ( fullModel, Cmd.none )
@@ -463,6 +473,9 @@ update msg fullModel =
 
         EntriesList state ->
             entriesListUpdate state
+
+        Import state raw ->
+            importUpdate state raw
 
 
 view : Model -> Html Msg
@@ -479,6 +492,16 @@ view model =
                     , content state
                     ]
 
+            Import _ value ->
+                column
+                    [ width fill
+                    , padding 20
+                    , spacing 20
+                    ]
+                    [ header
+                    , importView value
+                    ]
+
             _ ->
                 el [] (text "Loading...")
 
@@ -486,6 +509,30 @@ view model =
 header : Element Msg
 header =
     el [ Font.size (scaled 4) ] (text "RememberIt")
+
+
+importView : String -> Element Msg
+importView value =
+    column
+        [ width fill
+        , height fill
+        ]
+        [ Input.multiline
+            [ width fill
+            , height fill
+            , Input.focusedOnLoad
+            ]
+            { onChange = ImportTextChanged
+            , text = value
+            , placeholder = Nothing
+            , label = Input.labelAbove [] (text "Import state")
+            , spellcheck = False
+            }
+        , UI.button []
+            { onPress = Just ImportContent
+            , label = text "Import content"
+            }
+        ]
 
 
 content : EntriesListState -> Element Msg
