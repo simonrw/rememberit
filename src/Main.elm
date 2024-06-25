@@ -22,6 +22,15 @@ import UUID exposing (UUID)
 
 
 
+-- globals
+
+
+latestStateVersion : String
+latestStateVersion =
+    "1"
+
+
+
 -- sizing
 
 
@@ -43,9 +52,21 @@ port storeEntries : String -> Cmd msg
 
 saveEntries : List Entry -> Cmd msg
 saveEntries entries =
-    E.list entryEncoder entries
+    entriesEncoder entries
         |> E.encode 0
         |> storeEntries
+
+
+
+-- serde
+
+
+entriesEncoder : List Entry -> E.Value
+entriesEncoder entries =
+    E.object
+        [ ( "version", E.string latestStateVersion )
+        , ( "entries", E.list entryEncoder entries )
+        ]
 
 
 entryEncoder : Entry -> E.Value
@@ -55,12 +76,6 @@ entryEncoder entry =
         , ( "content", E.string entry.content )
         , ( "created", E.int <| Time.posixToMillis entry.created )
         ]
-
-
-getTimeForEntry : String -> UUID -> Cmd Msg
-getTimeForEntry s id =
-    Time.now
-        |> Task.perform (AppendEntry s id)
 
 
 entryDecoder : D.Decoder Entry
@@ -73,7 +88,22 @@ entryDecoder =
 
 entriesDecoder : D.Decoder (List Entry)
 entriesDecoder =
-    D.list entryDecoder
+    let
+        entriesDecoderV1 : D.Decoder (List Entry)
+        entriesDecoderV1 =
+            D.field "entries" <|
+                D.list entryDecoder
+    in
+    D.field "version" D.string
+        |> D.andThen
+            (\version ->
+                case version of
+                    "1" ->
+                        entriesDecoderV1
+
+                    _ ->
+                        D.fail "Invalid state version"
+            )
 
 
 decodeEntries : String -> List Entry
@@ -84,6 +114,16 @@ decodeEntries text =
 
         Err _ ->
             []
+
+
+
+-- time helpers
+
+
+getTimeForEntry : String -> UUID -> Cmd Msg
+getTimeForEntry s id =
+    Time.now
+        |> Task.perform (AppendEntry s id)
 
 
 
