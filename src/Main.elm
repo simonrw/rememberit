@@ -16,7 +16,7 @@ import Json.Encode as E
 import Random
 import String exposing (isEmpty)
 import Task
-import Time exposing (Month(..), Zone, ZoneName(..))
+import Time exposing (Month(..), Zone, ZoneName(..), getZoneName)
 import UI
 import UUID exposing (UUID)
 
@@ -107,11 +107,17 @@ type alias Entry =
     }
 
 
-type alias Model =
+type Model
+    = Init Flags
+    | WithTimeZone Flags Zone
+    | EntriesList EntriesListState
+
+
+type alias EntriesListState =
     { entries : List Entry
     , currentText : String
-    , zone : Maybe Zone
-    , zoneName : Maybe ZoneName
+    , zone : Zone
+    , zoneName : ZoneName
     , device : Device
     , editingEntry : Maybe Entry
     , importPanelOpen : Bool
@@ -152,47 +158,49 @@ type alias Flags =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init { initialRawState, windowHeight, windowWidth } =
-    let
-        device =
-            classifyDevice { height = windowHeight, width = windowWidth }
+init flags =
+    ( Init flags, fetchCurrentZone )
 
-        entryDecoder : D.Decoder Entry
-        entryDecoder =
-            D.map3 Entry
-                (D.at [ "id" ] UUID.jsonDecoder)
-                (D.at [ "content" ] D.string)
-                (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix t) D.int)
 
-        entriesDecoder : D.Decoder (List Entry)
-        entriesDecoder =
-            D.list entryDecoder
 
-        decodeEntries text =
-            case D.decodeString entriesDecoder text of
-                Ok entries ->
-                    entries
-
-                Err _ ->
-                    []
-    in
-    ( { entries =
-            initialRawState
-                |> Maybe.map decodeEntries
-                |> Maybe.withDefault []
-      , currentText = ""
-      , zone = Nothing
-      , zoneName = Nothing
-      , device = device
-      , editingEntry = Nothing
-      , importPanelOpen = False
-      , importContent = ""
-      }
-    , Cmd.batch
-        [ fetchCurrentZone
-        , fetchCurrentZoneName
-        ]
-    )
+-- init : Flags -> ( Model, Cmd Msg )
+-- init { initialRawState, windowHeight, windowWidth } =
+--     let
+--         device =
+--             classifyDevice { height = windowHeight, width = windowWidth }
+--         entryDecoder : D.Decoder Entry
+--         entryDecoder =
+--             D.map3 Entry
+--                 (D.at [ "id" ] UUID.jsonDecoder)
+--                 (D.at [ "content" ] D.string)
+--                 (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix t) D.int)
+--         entriesDecoder : D.Decoder (List Entry)
+--         entriesDecoder =
+--             D.list entryDecoder
+--         decodeEntries text =
+--             case D.decodeString entriesDecoder text of
+--                 Ok entries ->
+--                     entries
+--                 Err _ ->
+--                     []
+--     in
+--     ( { entries =
+--             initialRawState
+--                 |> Maybe.map decodeEntries
+--                 |> Maybe.withDefault []
+--       , currentText = ""
+--       , zone = Nothing
+--       , zoneName = Nothing
+--       , device = device
+--       , editingEntry = Nothing
+--       , importPanelOpen = False
+--       , importContent = ""
+--       }
+--     , Cmd.batch
+--         [ fetchCurrentZone
+--         , fetchCurrentZoneName
+--         ]
+--     )
 
 
 type Msg
@@ -293,124 +301,186 @@ datePicker zone time =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        WindowResized w h ->
-            ( { model | device = classifyDevice { width = w, height = h } }, Cmd.none )
+update msg fullModel =
+    let
+        initUpdate flags =
+            case msg of
+                GotZone zone ->
+                    ( WithTimeZone flags zone, fetchCurrentZoneName )
 
-        GotZone zone ->
-            ( { model | zone = Just zone }, Cmd.none )
+                _ ->
+                    ( fullModel, Cmd.none )
 
-        GotZoneName zoneName ->
-            ( { model | zoneName = Just zoneName }, Cmd.none )
-
-        UpdateCurrentText newText ->
-            ( { model | currentText = newText }, Cmd.none )
-
-        TriggerAddEntry ->
-            if isEmpty model.currentText then
-                ( model, Cmd.none )
-
-            else
-                ( { model | currentText = "" }, createNewEntry model.currentText )
-
-        GetTimeForEntry n id ->
-            ( model, getTimeForEntry n id )
-
-        AppendEntry s id t ->
-            let
-                entry =
-                    { id = id
-                    , content = s
-                    , created = t
-                    }
-
-                newEntries =
-                    model.entries ++ [ entry ]
-            in
-            ( { model | entries = newEntries }, saveEntries newEntries )
-
-        DuplicateEntry entry ->
-            ( model, createNewEntry entry.content )
-
-        QuickAddItem name ->
-            ( model, createNewEntry name )
-
-        ResetEntries ->
-            ( { model | entries = [] }, saveEntries [] )
-
-        TriggerUpdateEntry original ->
-            ( { model | editingEntry = Just original }, Cmd.none )
-
-        FinishedEditing ->
-            case model.editingEntry of
-                Just e ->
+        withTimeZoneUpdate { initialRawState, windowWidth, windowHeight } zone =
+            case msg of
+                GotZoneName name ->
                     let
-                        nonEditedEntries =
-                            List.filter (\entry -> entry.id /= e.id) model.entries
+                        device =
+                            classifyDevice { height = windowHeight, width = windowWidth }
 
-                        newEntriesList =
-                            nonEditedEntries ++ [ e ]
+                        entryDecoder : D.Decoder Entry
+                        entryDecoder =
+                            D.map3 Entry
+                                (D.at [ "id" ] UUID.jsonDecoder)
+                                (D.at [ "content" ] D.string)
+                                (D.at [ "created" ] <| D.map (\t -> Time.millisToPosix t) D.int)
+
+                        entriesDecoder : D.Decoder (List Entry)
+                        entriesDecoder =
+                            D.list entryDecoder
+
+                        decodeEntries text =
+                            case D.decodeString entriesDecoder text of
+                                Ok entries ->
+                                    entries
+
+                                Err _ ->
+                                    []
                     in
-                    ( { model | editingEntry = Nothing, entries = newEntriesList }, saveEntries newEntriesList )
+                    ( EntriesList
+                        { entries =
+                            initialRawState
+                                |> Maybe.map decodeEntries
+                                |> Maybe.withDefault []
+                        , currentText = ""
+                        , zone = zone
+                        , zoneName = name
+                        , device = device
+                        , editingEntry = Nothing
+                        , importPanelOpen = False
+                        , importContent = ""
+                        }
+                    , Cmd.none
+                    )
 
-                Nothing ->
-                    -- TODO: programming error
-                    ( model, Cmd.none )
+                _ ->
+                    ( fullModel, Cmd.none )
 
-        UpdateEditingEntry text ->
-            case model.editingEntry of
-                Just e ->
+        entriesListUpdate : EntriesListState -> ( Model, Cmd Msg )
+        entriesListUpdate model =
+            case msg of
+                WindowResized w h ->
+                    ( EntriesList { model | device = classifyDevice { width = w, height = h } }, Cmd.none )
+
+                UpdateCurrentText newText ->
+                    ( EntriesList { model | currentText = newText }, Cmd.none )
+
+                TriggerAddEntry ->
+                    if isEmpty model.currentText then
+                        ( fullModel, Cmd.none )
+
+                    else
+                        ( EntriesList { model | currentText = "" }, createNewEntry model.currentText )
+
+                GetTimeForEntry n id ->
+                    ( fullModel, getTimeForEntry n id )
+
+                AppendEntry s id t ->
                     let
-                        new =
-                            { e | content = text }
+                        entry =
+                            { id = id
+                            , content = s
+                            , created = t
+                            }
+
+                        newEntries =
+                            model.entries ++ [ entry ]
                     in
-                    ( { model | editingEntry = Just new }, Cmd.none )
+                    ( EntriesList { model | entries = newEntries }, saveEntries newEntries )
 
-                Nothing ->
-                    -- TODO: programming error
-                    ( model, Cmd.none )
+                DuplicateEntry entry ->
+                    ( fullModel, createNewEntry entry.content )
 
-        UpdateEditingTime text ->
-            case model.zoneName of
-                Just zoneName ->
-                    ( model, sendTimeForConversion zoneName text )
+                QuickAddItem name ->
+                    ( fullModel, createNewEntry name )
 
-                Nothing ->
-                    -- TODO :programming error
-                    ( model, Cmd.none )
+                ResetEntries ->
+                    ( EntriesList { model | entries = [] }, saveEntries [] )
 
-        TimeConversionResultReceived millis ->
-            case model.editingEntry of
-                Just current ->
-                    let
-                        newEntry =
-                            { current | created = Time.millisToPosix millis }
-                    in
-                    ( { model | editingEntry = Just newEntry }, Cmd.none )
+                TriggerUpdateEntry original ->
+                    ( EntriesList { model | editingEntry = Just original }, Cmd.none )
 
-                Nothing ->
-                    -- TODO: programming error
-                    ( model, Cmd.none )
+                FinishedEditing ->
+                    case model.editingEntry of
+                        Just e ->
+                            let
+                                nonEditedEntries =
+                                    List.filter (\entry -> entry.id /= e.id) model.entries
 
-        SaveToClipboard ->
-            ( model, saveToClipboard () )
+                                newEntriesList =
+                                    nonEditedEntries ++ [ e ]
+                            in
+                            ( EntriesList { model | editingEntry = Nothing, entries = newEntriesList }, saveEntries newEntriesList )
 
-        ToggleImportPanel ->
-            ( { model | importPanelOpen = True }, Cmd.none )
+                        Nothing ->
+                            -- TODO: programming error
+                            ( fullModel, Cmd.none )
+
+                UpdateEditingEntry text ->
+                    case model.editingEntry of
+                        Just e ->
+                            let
+                                new =
+                                    { e | content = text }
+                            in
+                            ( EntriesList { model | editingEntry = Just new }, Cmd.none )
+
+                        Nothing ->
+                            -- TODO: programming error
+                            ( fullModel, Cmd.none )
+
+                UpdateEditingTime text ->
+                    ( fullModel, sendTimeForConversion model.zoneName text )
+
+                TimeConversionResultReceived millis ->
+                    case model.editingEntry of
+                        Just current ->
+                            let
+                                newEntry =
+                                    { current | created = Time.millisToPosix millis }
+                            in
+                            ( EntriesList { model | editingEntry = Just newEntry }, Cmd.none )
+
+                        Nothing ->
+                            -- TODO: programming error
+                            ( fullModel, Cmd.none )
+
+                SaveToClipboard ->
+                    ( fullModel, saveToClipboard () )
+
+                ToggleImportPanel ->
+                    ( EntriesList { model | importPanelOpen = True }, Cmd.none )
+
+                _ ->
+                    ( fullModel, Cmd.none )
+    in
+    case fullModel of
+        Init flags ->
+            initUpdate flags
+
+        WithTimeZone flags zone ->
+            withTimeZoneUpdate flags zone
+
+        EntriesList state ->
+            entriesListUpdate state
 
 
 view : Model -> Html Msg
 view model =
     Element.layout [] <|
-        column
-            [ width fill
-            , padding 20
-            , spacing 20
-            ]
-            [ header
-            , content model
-            ]
+        case model of
+            EntriesList state ->
+                column
+                    [ width fill
+                    , padding 20
+                    , spacing 20
+                    ]
+                    [ header
+                    , content state
+                    ]
+
+            _ ->
+                el [] (text "Loading...")
 
 
 header : Element Msg
@@ -418,7 +488,7 @@ header =
     el [ Font.size (scaled 4) ] (text "RememberIt")
 
 
-content : Model -> Element Msg
+content : EntriesListState -> Element Msg
 content model =
     let
         onEnter msg =
@@ -498,7 +568,7 @@ countItems entries =
     List.foldl countFn Dict.empty entries
 
 
-createQuickAddItems : Model -> List (Element Msg)
+createQuickAddItems : EntriesListState -> List (Element Msg)
 createQuickAddItems model =
     let
         filterFn _ count =
@@ -521,7 +591,7 @@ createQuickAddItem name count =
         }
 
 
-viewQuickAddEntries : Model -> Element Msg
+viewQuickAddEntries : EntriesListState -> Element Msg
 viewQuickAddEntries model =
     let
         quickAddItems =
@@ -548,14 +618,10 @@ sortEntries entries =
         |> List.reverse
 
 
-entriesList : Model -> Element Msg
+entriesList : EntriesListState -> Element Msg
 entriesList model =
-    let
-        zone =
-            Maybe.withDefault Time.utc model.zone
-    in
     column [ width fill, spacingXY 0 16 ] <|
-        viewEntries model.device (sortEntries model.entries) zone model.editingEntry
+        viewEntries model.device (sortEntries model.entries) model.zone model.editingEntry
 
 
 viewEntries : Device -> List Entry -> Zone -> Maybe Entry -> List (Element Msg)
