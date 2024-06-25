@@ -4,6 +4,8 @@ import Browser
 import Browser.Events
 import Dict exposing (Dict)
 import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
@@ -12,7 +14,7 @@ import Html.Events
 import Json.Decode as D
 import Json.Encode as E
 import Random
-import String exposing (fromInt, isEmpty)
+import String exposing (isEmpty)
 import Task
 import Time exposing (Month(..), Zone, ZoneName(..))
 import UI
@@ -539,17 +541,17 @@ entriesList model =
         zone =
             Maybe.withDefault Time.utc model.zone
     in
-    column [ width fill ] <|
-        viewEntries (sortEntries model.entries) zone model.editingEntry
+    column [ width fill, spacingXY 0 16 ] <|
+        viewEntries model.device (sortEntries model.entries) zone model.editingEntry
 
 
-viewEntries : List Entry -> Zone -> Maybe Entry -> List (Element Msg)
-viewEntries entries zone editingEntry =
-    List.map (viewEntry zone editingEntry) entries
+viewEntries : Device -> List Entry -> Zone -> Maybe Entry -> List (Element Msg)
+viewEntries device entries zone editingEntry =
+    List.map (viewEntry device zone editingEntry) entries
 
 
-viewEntry : Zone -> Maybe Entry -> Entry -> Element Msg
-viewEntry zone editingEntry entry =
+viewEntry : Device -> Zone -> Maybe Entry -> Entry -> Element Msg
+viewEntry device zone editingEntry entry =
     let
         s =
             toUtcString zone entry.created ++ ": " ++ entry.content
@@ -595,21 +597,73 @@ viewEntry zone editingEntry entry =
             ]
 
         normalContent =
-            [ el [ width fill ] (text s)
-            , UI.button
-                []
-                { onPress = Just (DuplicateEntry entry)
-                , label = text "Duplicate"
-                }
-            , UI.button
-                []
-                { onPress = Just (TriggerUpdateEntry entry)
-                , label = text "Update"
-                }
-            ]
+            let
+                phoneLayout =
+                    [ column
+                        [ width fill
+                        , padding 16
+                        , spacingXY 0 8
+                        ]
+                        [ el [ width fill ] (text s)
+                        , row
+                            [ width fill
+                            , centerX
+                            , spacingXY 16 0
+                            ]
+                            [ UI.button
+                                []
+                                { onPress = Just (DuplicateEntry entry)
+                                , label = text "Duplicate"
+                                }
+                            , UI.button
+                                []
+                                { onPress = Just (TriggerUpdateEntry entry)
+                                , label = text "Update"
+                                }
+                            ]
+                        ]
+                    ]
+
+                desktopLayout =
+                    [ el [ width fill ] (text s)
+                    , UI.button
+                        []
+                        { onPress = Just (DuplicateEntry entry)
+                        , label = text "Duplicate"
+                        }
+                    , UI.button
+                        []
+                        { onPress = Just (TriggerUpdateEntry entry)
+                        , label = text "Update"
+                        }
+                    ]
+            in
+            case device.class of
+                Phone ->
+                    phoneLayout
+
+                Tablet ->
+                    phoneLayout
+
+                _ ->
+                    desktopLayout
+
+        backgroundColor =
+            case device.class of
+                Phone ->
+                    rgba255 0x42 0x99 0xE1 0.1
+
+                Tablet ->
+                    rgba255 0x42 0x99 0xE1 0.1
+
+                _ ->
+                    rgba255 0 0 0 0.0
     in
     row
-        [ spacingXY 50 0
+        [ spacingXY 50 8
         , width fill
+        , Background.color backgroundColor
+        , Border.rounded 15
+        , padding 8
         ]
         entryContent
