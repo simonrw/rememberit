@@ -577,7 +577,10 @@ content model =
         [ width fill
         , spacing 20
         ]
-        [ row [ spacingXY 20 0 ]
+        [ wrappedRow
+            [ width fill
+            , spacingXY 20 8
+            ]
             [ UI.button
                 []
                 { onPress = Just ResetEntries
