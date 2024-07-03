@@ -1,33 +1,19 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <main className="flex flex-col gap-4 p-4 h-screen w-screen">
+      <h1 className="text-2xl font-bold">RememberIt</h1>
+      <div className="flex gap-2 justify-start">
+        <button className="rounded-2xl bg-blue-500 px-4 py-2 text-white">Reset entries</button>
+        <button className="rounded-2xl bg-blue-500 px-4 py-2 text-white">Export entries</button>
+        <button className="rounded-2xl bg-blue-500 px-4 py-2 text-white">Import entries</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className="flex gap-2 items-center">
+        <label htmlFor="entry-input">Entry</label>
+        <input type="text" id="entry-input" className="flex-1 border border-black rounded-sm" autoFocus={true}></input>
+        <button className="rounded-2xl bg-blue-500 px-4 py-2 text-white">Add entry</button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </main>
+  );
 }
 
-export default App
+export default App;
