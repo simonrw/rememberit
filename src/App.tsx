@@ -19,7 +19,7 @@ function Content() {
   };
 
   return (
-    <main className="flex flex-col gap-4 p-4 h-screen w-screen">
+    <main className="dark:bg-gray-800 dark:text-white flex flex-col gap-4 p-4 h-screen w-screen">
       <h1 className="text-2xl font-bold">RememberIt</h1>
       <div className="flex gap-2 justify-start">
         <button
@@ -38,7 +38,7 @@ function Content() {
           Import entries
         </button>
       </div>
-      <div className="flex gap-2 items-center">
+      <form className="flex gap-2 items-center">
         <label htmlFor="entry-input">Entry</label>
         <input
           type="text"
@@ -69,7 +69,7 @@ function Content() {
         >
           Add entry
         </button>
-      </div>
+      </form>
       <div className="flex flex-col overflow-y-scroll">
         {items.map((item) => {
           return Entry(item);
