@@ -85,7 +85,7 @@ function Content() {
           type="text"
           id="entry-input"
           value={newText}
-          className="flex-1 border border-black rounded-sm"
+          className="flex-1 border border-black rounded-sm dark:text-black"
           autoFocus={true}
           onChange={(e) => {
             setNewText(e.target.value);
