@@ -1,15 +1,21 @@
 import { Entry, Item } from "./Entry";
 
 export interface EntryListProps {
- items: Item[];
-  deleteFn: (id: string) => void ;
+  items: Item[];
+  deleteFn: (id: string) => void;
+  updateFn: (id: string, content: string, created: Date) => void;
 }
 
 export function EntryList(props: EntryListProps) {
-  return (<div className="flex flex-col overflow-y-scroll">
-    {props.items.map((item) => {
-      return Entry({ item, deleteFn: props.deleteFn });
-    })}
-  </div>
-  )
+  return (
+    <div className="flex flex-col overflow-y-scroll">
+      {props.items.map((item) => {
+        return Entry({
+          item,
+          deleteFn: props.deleteFn,
+          updateFn: props.updateFn,
+        });
+      })}
+    </div>
+  );
 }
