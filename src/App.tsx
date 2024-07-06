@@ -30,6 +30,18 @@ function Content() {
     localStorage.setItem(STORAGE_ITEM_KEY, JSON.stringify(newItems));
   };
 
+  const updateItem = (id: string, content: string, created: Date) => {
+    const newItems = items.map((item) => {
+      if (item.id === id) {
+        return { id, content, created };
+      } else {
+        return item;
+      }
+    });
+    setItems(newItems);
+    localStorage.setItem(STORAGE_ITEM_KEY, JSON.stringify(newItems));
+  };
+
   const exportState = async () => {
     const entriesText = localStorage.getItem("entries") || "[]";
     const type = "text/plain";
@@ -145,7 +157,7 @@ function Content() {
           </svg>
         </button>
       </form>
-      <EntryList items={items} deleteFn={deleteItem} />
+      <EntryList items={items} deleteFn={deleteItem} updateFn={updateItem} />
     </main>
   );
 }
