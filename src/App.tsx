@@ -19,6 +19,12 @@ function Content() {
     localStorage.setItem(STORAGE_ITEM_KEY, serialized);
   };
 
+  const deleteItem = (id: string) => {
+    const newItems = items.filter((i) => i.id !== id);
+    setItems(newItems);
+    localStorage.setItem(STORAGE_ITEM_KEY, JSON.stringify(newItems));
+  };
+
   return (
     <main className="dark:bg-gray-800 dark:text-white flex flex-col gap-4 p-4 h-screen w-screen">
       <h1 className="text-2xl font-bold">RememberIt</h1>
@@ -125,7 +131,7 @@ function Content() {
           </svg>
         </button>
       </form>
-      <EntryList items={items} />
+      <EntryList items={items} deleteFn={deleteItem}/>
     </main>
   );
 }
