@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
-import { Entry, Item } from "./Entry";
+import { Item } from "./components/Entry";
+import { EntryList } from "./components/EntryList";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -124,11 +125,7 @@ function Content() {
           </svg>
         </button>
       </form>
-      <div className="flex flex-col overflow-y-scroll">
-        {items.map((item) => {
-          return Entry(item);
-        })}
-      </div>
+      <EntryList items={items} />
     </main>
   );
 }
