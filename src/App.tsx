@@ -19,10 +19,23 @@ function Content() {
     localStorage.setItem(STORAGE_ITEM_KEY, serialized);
   };
 
+  const resetItems = () => {
+    setItems([]);
+    persistState([]);
+  };
+
   const deleteItem = (id: string) => {
     const newItems = items.filter((i) => i.id !== id);
     setItems(newItems);
     localStorage.setItem(STORAGE_ITEM_KEY, JSON.stringify(newItems));
+  };
+
+  const exportState = async () => {
+    const entriesText = localStorage.getItem("entries") || "[]";
+    const type = "text/plain";
+    const blob = new Blob([entriesText], { type });
+    const data = [new ClipboardItem({ [type]: blob })];
+    await navigator.clipboard.write(data);
   };
 
   return (
