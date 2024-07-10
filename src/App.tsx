@@ -26,7 +26,7 @@ function Content() {
   };
 
   const addItem = (content: string): void => {
-    const newItem = { content, id: uuidv4(), created: new Date() };
+    const newItem = { content, id: uuidv4(), created: new Date().toLocaleString() };
     setItems((oldItems) => {
       const newItems = [...oldItems, newItem];
       persistState(newItems);
@@ -42,11 +42,11 @@ function Content() {
     });
   };
 
-  const updateItem = (id: string, content: string, created: Date): void => {
+  const updateItem = (id: string, content: string, created: string): void => {
     setItems((oldItems) => {
       const newItems = oldItems.map((item) => {
         if (item.id === id) {
-          return { id, content, created };
+          return { id, content, created: created.toLocaleString() };
         } else {
           return item;
         }
@@ -129,7 +129,13 @@ function Content() {
 
       <QuickAdds entries={items} addEntry={addItem} />
 
-      <form className="flex gap-2 items-center">
+      <form className="flex gap-2 items-center"
+        onSubmit={(e) => {
+          e.preventDefault();
+          addItem(newText);
+          setNewText("");
+        }}
+      >
         <label htmlFor="entry-input">Entry</label>
         <input
           type="text"
@@ -143,7 +149,6 @@ function Content() {
         ></input>
         <button
           className="rounded-2xl bg-blue-500 px-4 py-2 text-white"
-          onClick={() => addItem(newText)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

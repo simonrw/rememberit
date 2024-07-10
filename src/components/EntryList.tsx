@@ -3,7 +3,7 @@ import { Entry, Item } from "./Entry";
 export interface EntryListProps {
   items: Item[];
   deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: Date) => void;
+  updateFn: (id: string, content: string, created: string) => void;
 }
 
 export function EntryList(props: EntryListProps) {
