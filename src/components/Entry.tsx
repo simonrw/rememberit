@@ -3,13 +3,13 @@ import { useState } from "react";
 export interface EntryProps {
   item: Item;
   deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: Date) => void;
+  updateFn: (id: string, content: string, created: string) => void;
 }
 
 export interface Item {
   id: string;
   content: string;
-  created: Date;
+  created: string;
 }
 
 export function Entry(props: EntryProps) {
