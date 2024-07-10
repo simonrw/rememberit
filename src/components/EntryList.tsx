@@ -10,11 +10,7 @@ export function EntryList(props: EntryListProps) {
   return (
     <div className="flex flex-col overflow-y-scroll">
       {props.items.map((item) => {
-        return Entry({
-          item,
-          deleteFn: props.deleteFn,
-          updateFn: props.updateFn,
-        });
+        return <Entry key={item.id} item={item} deleteFn={props.deleteFn} updateFn={props.updateFn} />
       })}
     </div>
   );
