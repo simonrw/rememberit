@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
 import { Item } from "./components/Entry";
 import { EntryList } from "./components/EntryList";
+import QuickAdds from "./components/QuickAdds";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -24,25 +25,38 @@ function Content() {
     persistState([]);
   };
 
-  const deleteItem = (id: string) => {
-    const newItems = items.filter((i) => i.id !== id);
-    setItems(newItems);
-    localStorage.setItem(STORAGE_ITEM_KEY, JSON.stringify(newItems));
-  };
-
-  const updateItem = (id: string, content: string, created: Date) => {
-    const newItems = items.map((item) => {
-      if (item.id === id) {
-        return { id, content, created };
-      } else {
-        return item;
-      }
+  const addItem = (content: string): void => {
+    const newItem = { content, id: uuidv4(), created: new Date() };
+    setItems((oldItems) => {
+      const newItems = [...oldItems, newItem];
+      persistState(newItems);
+      return newItems;
     });
-    setItems(newItems);
-    localStorage.setItem(STORAGE_ITEM_KEY, JSON.stringify(newItems));
   };
 
-  const exportState = async () => {
+  const deleteItem = (id: string): void => {
+    setItems((oldItems) => {
+      const newItems = oldItems.filter((i) => i.id !== id);
+      persistState(newItems);
+      return newItems;
+    });
+  };
+
+  const updateItem = (id: string, content: string, created: Date): void => {
+    setItems((oldItems) => {
+      const newItems = oldItems.map((item) => {
+        if (item.id === id) {
+          return { id, content, created };
+        } else {
+          return item;
+        }
+      });
+      persistState(newItems);
+      return newItems;
+    });
+  };
+
+  const exportState = async (): Promise<void> => {
     const entriesText = localStorage.getItem("entries") || "[]";
     const type = "text/plain";
     const blob = new Blob([entriesText], { type });
@@ -112,6 +126,9 @@ function Content() {
           </svg>
         </button>
       </div>
+
+      <QuickAdds entries={items} addEntry={addItem} />
+
       <form className="flex gap-2 items-center">
         <label htmlFor="entry-input">Entry</label>
         <input
@@ -126,20 +143,7 @@ function Content() {
         ></input>
         <button
           className="rounded-2xl bg-blue-500 px-4 py-2 text-white"
-          onClick={() => {
-            if (newText === "") {
-              return;
-            }
-            const newItem = {
-              id: uuidv4(),
-              content: newText,
-              created: new Date(),
-            };
-            const newItems = [...items, newItem];
-            setItems(newItems);
-            setNewText("");
-            persistState(newItems);
-          }}
+          onClick={() => addItem(newText)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
