@@ -26,7 +26,7 @@ export function Entry(props: EntryProps) {
 
   const finishEditing = () => {
     console.log("Finished editing");
-    props.updateFn(props.item.id, newContent, new Date(newDate));
+    props.updateFn(props.item.id, newContent, newDate);
     setEditing(false);
   };
 
