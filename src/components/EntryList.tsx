@@ -1,4 +1,5 @@
-import { Entry, Item } from "./Entry";
+import { Item } from "../types/item";
+import { Entry } from "./Entry";
 
 export interface EntryListProps {
   items: Item[];
@@ -8,7 +9,6 @@ export interface EntryListProps {
 
 export function EntryList(props: EntryListProps) {
   const sortedEntries = [...props.items].sort(sortEntry);
-  console.log({ sortedEntries });
   return (
     <div className="flex flex-col overflow-y-auto">
       {sortedEntries.map((item) => {

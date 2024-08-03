@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
-import { Item } from "./components/Entry";
 import { EntryList } from "./components/EntryList";
 import QuickAdds from "./components/QuickAdds";
 import { newDate } from "./date";
 import { Footer } from "./components/Footer";
+import { Item } from "./types/item";
 
 const STORAGE_ITEM_KEY = "entries";
 

@@ -1,4 +1,4 @@
-import { Item } from "./Entry";
+import { Item } from "../types/item";
 import QuickAdd from "./QuickAdd";
 
 export type QuickAddsProps = {
