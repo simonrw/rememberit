@@ -68,8 +68,11 @@ function Content() {
 
   return (
     <div className="h-screen flex flex-col">
-      <main className="dark:bg-gray-800 dark:text-white flex flex-col gap-4 p-4 w-screen flex-1 overflow-y-auto">
-        <h1 className="text-2xl font-bold">RememberIt</h1>
+      <main className="dark:bg-gray-800 dark:text-white flex flex-col gap-4 p-4 w-screen flex-1 overflow-y-auto text-lg md:text-base">
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl md:text-2xl font-bold leading-tight tracking-tight">RememberIt</h1>
+          <img src="icons/remembering.png" className="w-8 bg-white rounded-full p-1"></img>
+        </div>
         <div className="flex gap-2 justify-start">
           {/* Reset entries */}
           <button
