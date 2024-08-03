@@ -1,0 +1,13 @@
+{
+  "name": "RememberIt",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "icons/remembering.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "display": "standalone"
+}
+
