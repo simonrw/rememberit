@@ -7,11 +7,21 @@ export interface EntryListProps {
 }
 
 export function EntryList(props: EntryListProps) {
+  const sortedEntries = [...props.items].sort(sortEntry);
+  console.log({ sortedEntries });
   return (
     <div className="flex flex-col overflow-y-scroll">
-      {props.items.map((item) => {
+      {sortedEntries.map((item) => {
         return <Entry key={item.id} item={item} deleteFn={props.deleteFn} updateFn={props.updateFn} />
       })}
     </div>
   );
+}
+
+const sortEntry = (a: Item, b: Item): number => {
+  if (a.created === b.created) {
+    return 0;
+  } else {
+    return a.created > b.created ? -1 : 1;
+  }
 }
