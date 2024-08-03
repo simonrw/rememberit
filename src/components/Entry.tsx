@@ -17,6 +17,10 @@ export function Entry(props: EntryProps) {
   const [newContent, setNewContent] = useState(props.item.content);
   const [newDate, setNewDate] = useState(props.item.created.toLocaleString());
 
+  const toggleEditing = () => {
+    setEditing(!editing);
+  };
+
   const cancelEditing = () => {
     setNewContent(props.item.content);
     setNewDate(props.item.created.toLocaleString());
@@ -46,8 +50,7 @@ export function Entry(props: EntryProps) {
       item={props.item}
       deleteFn={props.deleteFn}
       updateFn={props.updateFn}
-      editing={editing}
-      setEditing={setEditing}
+      toggleEditing={toggleEditing}
     />
   }
 }
@@ -119,8 +122,7 @@ type ReadOnlyEntryProps = {
   item: Item;
   deleteFn: (id: string) => void;
   updateFn: (id: string, content: string, created: string) => void;
-  editing: boolean,
-  setEditing: (editing: boolean) => void;
+  toggleEditing: () => void;
 };
 
 function ReadOnlyEntry(props: ReadOnlyEntryProps) {
@@ -129,7 +131,7 @@ function ReadOnlyEntry(props: ReadOnlyEntryProps) {
       key={props.item.id}
       className="py-2 flex gap-2 justify-between"
       onClick={() => {
-        props.setEditing(!props.editing);
+        props.toggleEditing()
       }}
     >
       <div className="flex gap-2">
