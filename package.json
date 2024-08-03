@@ -1,22 +1,37 @@
 {
-  "name": "rememberit",
-  "version": "1.0.0",
-  "description": "When did that thing happen? RememberIt is a simple note taking app that lets you jot down notes for yourself in a quick way so that you remember when things happen.",
-  "main": "index.js",
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "elm": "elm",
-    "dev": "elm-live -- src/Main.elm --debug --output elm.js",
-    "build": "elm make src/Main.elm --optimize --output elm.js"
+    "dev": "vite",
+    "dev:public": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "vercel": "vercel"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@playwright/test": "^1.45.3",
-    "@types/node": "^20.14.11",
-    "elm": "^0.19.1-6",
-    "elm-format": "^0.8.7",
-    "elm-live": "^4.0.2",
+  "dependencies": {
+    "@tanstack/react-query": "^5.49.2",
+    "@types/uuid": "^10.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.2.2",
+    "vercel": "^34.3.0",
+    "vite": "^5.3.1"
   }
 }
