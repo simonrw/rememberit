@@ -5,6 +5,7 @@ import QuickAdds from "./components/QuickAdds";
 import { newDate } from "./date";
 import { Footer } from "./components/Footer";
 import { Item } from "./types/item";
+import { ImportDialogue } from "./components/ImportDialogue";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -16,6 +17,7 @@ const fetchState = (): Item[] => {
 function Content() {
   const [items, setItems] = useState(fetchState());
   const [newText, setNewText] = useState("");
+  const [importing, setImporting] = useState(false);
 
   const persistState = (updatedItems: Item[]) => {
     const serialized = JSON.stringify(updatedItems);
@@ -58,6 +60,12 @@ function Content() {
     });
   };
 
+  const importState = (state: Item[]) => {
+    setItems(state);
+    persistState(state);
+    setImporting(false);
+  };
+
   const exportState = async (): Promise<void> => {
     const entriesText = localStorage.getItem("entries") || "[]";
     const type = "text/plain";
@@ -65,6 +73,13 @@ function Content() {
     const data = [new ClipboardItem({ [type]: blob })];
     await navigator.clipboard.write(data);
   };
+
+  if (importing) {
+    return <ImportDialogue
+      cancelImport={() => setImporting(false)}
+      importState={importState}
+    />
+  }
 
   return (
     <div className="h-screen flex flex-col">
@@ -115,7 +130,10 @@ function Content() {
             </svg>
           </button>
           {/* import state */}
-          <button className="rounded-2xl bg-blue-500 px-4 py-2 text-white">
+          <button
+            className="rounded-2xl bg-blue-500 px-4 py-2 text-white"
+            onClick={() => setImporting(true)}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
