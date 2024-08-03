@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Item } from "./components/Entry";
 import { EntryList } from "./components/EntryList";
 import QuickAdds from "./components/QuickAdds";
+import { newDate } from "./date";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -26,7 +27,7 @@ function Content() {
   };
 
   const addItem = (content: string): void => {
-    const newItem = { content, id: uuidv4(), created: new Date().toLocaleString() };
+    const newItem = { content, id: uuidv4(), created: newDate() };
     setItems((oldItems) => {
       const newItems = [...oldItems, newItem];
       persistState(newItems);
