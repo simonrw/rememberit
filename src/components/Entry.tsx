@@ -82,7 +82,7 @@ export function Entry(props: EntryProps) {
     return (
       <div
         key={props.item.id}
-        className="flex gap-2"
+        className="flex gap-2 justify-between"
         onClick={() => {
           setEditing(!editing);
         }}
@@ -94,7 +94,7 @@ export function Entry(props: EntryProps) {
           <div>{props.item.content}</div>
         </div>
         <div>
-          <button onClick={() => props.deleteFn(props.item.id)}>
+          <button onClick={() => props.deleteFn(props.item.id)} className="text-red-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
