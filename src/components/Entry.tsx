@@ -28,7 +28,6 @@ export function Entry(props: EntryProps) {
   };
 
   const finishEditing = () => {
-    console.log("Finished editing");
     props.updateFn(props.item.id, newContent, newDate);
     setEditing(false);
   };
@@ -36,8 +35,6 @@ export function Entry(props: EntryProps) {
   if (editing) {
     return <EditingEntry
       item={props.item}
-      deleteFn={props.deleteFn}
-      updateFn={props.updateFn}
       newContent={newContent}
       setNewContent={setNewContent}
       newDate={newDate}
@@ -49,7 +46,6 @@ export function Entry(props: EntryProps) {
     return <ReadOnlyEntry
       item={props.item}
       deleteFn={props.deleteFn}
-      updateFn={props.updateFn}
       toggleEditing={toggleEditing}
     />
   }
@@ -57,8 +53,6 @@ export function Entry(props: EntryProps) {
 
 type EditingEntryProps = {
   item: Item;
-  deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: string) => void;
   newContent: string,
   setNewContent: (newContent: string) => void,
   newDate: string,
@@ -121,7 +115,6 @@ function EditingEntry(props: EditingEntryProps) {
 type ReadOnlyEntryProps = {
   item: Item;
   deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: string) => void;
   toggleEditing: () => void;
 };
 
