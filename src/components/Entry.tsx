@@ -82,7 +82,7 @@ export function Entry(props: EntryProps) {
     return (
       <div
         key={props.item.id}
-        className="flex gap-2 justify-between"
+        className="py-2 flex gap-2 justify-between"
         onClick={() => {
           setEditing(!editing);
         }}
