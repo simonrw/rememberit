@@ -31,18 +31,19 @@ export function Entry(props: EntryProps) {
 
   if (editing) {
     return (
-      <div key={props.item.id} className="flex gap-2">
-        <input className="shrink dark:text-black text-gray-500 font-light" value={newDate} onChange={(e) => setNewDate(e.currentTarget.value)} aria-label="Date and time" type="datetime-local" />
+      <div key={props.item.id} className="py-4 px-2 space-y-2 flex flex-col gap-2 border border-sky-300 rounded-lg">
+        <p className="text-sm">Edit item</p>
+        <input className="rounded-lg p-2 dark:text-black text-gray-500 font-light" value={newDate} onChange={(e) => setNewDate(e.currentTarget.value)} aria-label="Date and time" type="datetime-local" />
         <input
-          className="text-black shrink"
+          className="rounded-lg text-black p-2"
           type="text"
           value={newContent}
           onChange={(e) => {
             setNewContent(e.target.value);
           }}
         ></input>
-        <div className="flex">
-          <button onClick={cancelEditing}>
+        <div className="flex justify-between">
+          <button onClick={cancelEditing} className="text-red-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -58,7 +59,7 @@ export function Entry(props: EntryProps) {
               />
             </svg>
           </button>
-          <button onClick={finishEditing}>
+          <button onClick={finishEditing} className="text-green-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
