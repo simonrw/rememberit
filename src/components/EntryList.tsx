@@ -10,7 +10,7 @@ export function EntryList(props: EntryListProps) {
   const sortedEntries = [...props.items].sort(sortEntry);
   console.log({ sortedEntries });
   return (
-    <div className="flex flex-col overflow-y-scroll">
+    <div className="flex flex-col overflow-y-auto">
       {sortedEntries.map((item) => {
         return <Entry key={item.id} item={item} deleteFn={props.deleteFn} updateFn={props.updateFn} />
       })}
