@@ -13,7 +13,7 @@ export interface EntryProps {
 export function Entry(props: EntryProps) {
   const [editing, setEditing] = useState(false);
   const [newContent, setNewContent] = useState(props.item.content);
-  const [newDate, setNewDate] = useState(props.item.created.toLocaleString());
+  const [newDate, setNewDate] = useState(props.item.created);
 
   const toggleEditing = () => {
     setEditing(!editing);
@@ -21,7 +21,7 @@ export function Entry(props: EntryProps) {
 
   const cancelEditing = () => {
     setNewContent(props.item.content);
-    setNewDate(props.item.created.toLocaleString());
+    setNewDate(props.item.created);
     setEditing(false);
   };
 

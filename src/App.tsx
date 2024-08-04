@@ -30,7 +30,7 @@ function Content() {
   };
 
   const addItem = (content: string): void => {
-    const newItem = { content, id: uuidv4(), created: newDate() };
+    const newItem: Item = { content, id: uuidv4(), created: newDate() };
     setItems((oldItems) => {
       const newItems = [...oldItems, newItem];
       persistState(newItems);
@@ -50,7 +50,7 @@ function Content() {
     setItems((oldItems) => {
       const newItems = oldItems.map((item) => {
         if (item.id === id) {
-          return { id, content, created: created.toLocaleString() };
+          return { id, content, created };
         } else {
           return item;
         }
