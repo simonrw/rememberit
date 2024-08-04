@@ -14,7 +14,7 @@ export function EditingEntry(props: EditingEntryProps) {
   return (
     <div key={props.item.id} className="py-4 px-2 space-y-2 flex flex-col gap-2 border border-sky-300 rounded-lg">
       <p className="text-sm">Edit item</p>
-      <input className="rounded-lg p-2 dark:text-black text-gray-500 font-light" value={props.newDate} onChange={(e) => props.setNewDate(e.currentTarget.value)} aria-label="Date and time" type="datetime-local" />
+      <input className="rounded-lg p-2 text-gray-500 font-light" value={props.newDate} onChange={(e) => props.setNewDate(e.currentTarget.value)} aria-label="Date and time" type="datetime-local" />
       <input
         className="rounded-lg text-black p-2"
         type="text"

@@ -6,6 +6,7 @@ import { newDate } from "./date";
 import { Footer } from "./components/Footer";
 import { Item } from "./types/item";
 import { ImportDialogue } from "./components/ImportDialogue";
+import { ModeToggle } from "./components/mode-toggle";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -83,10 +84,13 @@ function Content() {
 
   return (
     <div className="h-screen flex flex-col">
-      <main className="dark:bg-gray-800 dark:text-white flex flex-col gap-4 p-4 w-screen flex-1 overflow-y-auto text-lg md:text-base">
+      <main className="flex flex-col gap-4 p-4 w-screen flex-1 overflow-y-auto text-lg md:text-base">
         <div className="flex items-center justify-between">
           <h1 className="text-4xl md:text-2xl font-bold leading-tight tracking-tight">RememberIt</h1>
-          <img src="icons/remembering.png" className="w-8 bg-white rounded-full p-1"></img>
+          <div className="flex">
+            <ModeToggle />
+            <img src="icons/remembering.png" className="w-8 bg-white rounded-full p-1"></img>
+          </div>
         </div>
         <div className="flex gap-2 justify-start">
           {/* Reset entries */}
@@ -165,7 +169,7 @@ function Content() {
             type="text"
             id="entry-input"
             value={newText}
-            className="flex-1 border border-black rounded-sm dark:text-black"
+            className="flex-1 border border-black rounded-sm"
             autoFocus={true}
             onChange={(e) => {
               setNewText(e.target.value);
