@@ -9,6 +9,7 @@ import { ImportDialogue } from "./components/ImportDialogue";
 import { ModeToggle } from "./components/mode-toggle";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
+import { useToast } from "./components/ui/use-toast";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -22,6 +23,9 @@ function Content() {
   const [newText, setNewText] = useState("");
   const [importing, setImporting] = useState(false);
 
+  const { toast } = useToast()
+
+
   const persistState = (updatedItems: Item[]) => {
     const serialized = JSON.stringify(updatedItems);
     localStorage.setItem(STORAGE_ITEM_KEY, serialized);
@@ -30,6 +34,9 @@ function Content() {
   const resetItems = () => {
     setItems([]);
     persistState([]);
+    toast({
+      description: "Items reset",
+    });
   };
 
   const addItem = (content: string): void => {
@@ -47,6 +54,7 @@ function Content() {
       persistState(newItems);
       return newItems;
     });
+    toast({ variant: "destructive", description: "Item deleted" });
   };
 
   const updateItem = (id: string, content: string, created: string): void => {
@@ -61,12 +69,14 @@ function Content() {
       persistState(newItems);
       return newItems;
     });
+    toast({ description: "Item updated" });
   };
 
   const importState = (state: Item[]) => {
     setItems(state);
     persistState(state);
     setImporting(false);
+    toast({ description: "Imported state" });
   };
 
   const exportState = async (): Promise<void> => {
@@ -75,6 +85,7 @@ function Content() {
     const blob = new Blob([entriesText], { type });
     const data = [new ClipboardItem({ [type]: blob })];
     await navigator.clipboard.write(data);
+    toast({ description: "Copied items to clipboard" });
   };
 
   if (importing) {
