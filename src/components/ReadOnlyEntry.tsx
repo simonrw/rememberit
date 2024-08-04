@@ -16,7 +16,7 @@ export function ReadOnlyEntry(props: ReadOnlyEntryProps) {
       }}
     >
       <div className="flex gap-2">
-        <div className="dark:text-gray-200 text-gray-500 font-light">
+        <div className="text-gray-500 font-light">
           {props.item.created}
         </div>
         <div>{props.item.content}</div>
