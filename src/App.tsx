@@ -40,6 +40,11 @@ function Content() {
   };
 
   const addItem = (content: string): void => {
+    if (!content) {
+      toast({ description: "No description added", variant: "destructive" });
+      return;
+    }
+
     const newItem: Item = { content, id: uuidv4(), created: newDate() };
     setItems((oldItems) => {
       const newItems = [...oldItems, newItem];
