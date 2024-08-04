@@ -1,5 +1,6 @@
 import { Item } from "../types/item";
 import { Entry } from "./Entry";
+import { ScrollArea } from "./ui/scroll-area";
 
 export interface EntryListProps {
   items: Item[];
@@ -10,11 +11,13 @@ export interface EntryListProps {
 export function EntryList(props: EntryListProps) {
   const sortedEntries = [...props.items].sort(sortEntry);
   return (
-    <div className="flex flex-col overflow-y-auto">
-      {sortedEntries.map((item) => {
-        return <Entry key={item.id} item={item} deleteFn={props.deleteFn} updateFn={props.updateFn} />
-      })}
-    </div>
+    <ScrollArea>
+      <div className="flex flex-col">
+        {sortedEntries.map((item) => {
+          return <Entry key={item.id} item={item} deleteFn={props.deleteFn} updateFn={props.updateFn} />
+        })}
+      </div>
+    </ScrollArea>
   );
 }
 
