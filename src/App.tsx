@@ -8,6 +8,7 @@ import { Item } from "./types/item";
 import { ImportDialogue } from "./components/ImportDialogue";
 import { ModeToggle } from "./components/mode-toggle";
 import { Button } from "./components/ui/button";
+import { Input } from "./components/ui/input";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -164,17 +165,16 @@ function Content() {
             setNewText("");
           }}
         >
-          <label htmlFor="entry-input">Entry</label>
-          <input
+          <Input
+            placeholder="What would you like to remember?"
             type="text"
             id="entry-input"
             value={newText}
-            className="dark:text-black flex-1 border border-black rounded-sm"
             autoFocus={true}
             onChange={(e) => {
               setNewText(e.target.value);
             }}
-          ></input>
+          ></Input>
           <Button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
