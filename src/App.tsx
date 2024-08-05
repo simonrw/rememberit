@@ -18,13 +18,12 @@ const fetchState = (): Item[] => {
   return serialized === null ? [] : JSON.parse(serialized);
 };
 
-function Content() {
+function App() {
   const [items, setItems] = useState(fetchState());
   const [newText, setNewText] = useState("");
   const [importing, setImporting] = useState(false);
 
-  const { toast } = useToast()
-
+  const { toast } = useToast();
 
   const persistState = (updatedItems: Item[]) => {
     const serialized = JSON.stringify(updatedItems);
@@ -94,27 +93,32 @@ function Content() {
   };
 
   if (importing) {
-    return <ImportDialogue
-      cancelImport={() => setImporting(false)}
-      importState={importState}
-    />
+    return (
+      <ImportDialogue
+        cancelImport={() => setImporting(false)}
+        importState={importState}
+      />
+    );
   }
 
   return (
     <div className="h-screen flex flex-col">
       <main className="flex flex-col gap-4 p-4 w-screen flex-1 overflow-y-auto text-lg md:text-base">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl md:text-2xl font-bold leading-tight tracking-tight">RememberIt</h1>
+          <h1 className="text-4xl md:text-2xl font-bold leading-tight tracking-tight">
+            RememberIt
+          </h1>
           <div className="flex">
             <ModeToggle />
-            <img src="icons/remembering.png" className="w-8 bg-white rounded-full p-1"></img>
+            <img
+              src="icons/remembering.png"
+              className="w-8 bg-white rounded-full p-1"
+            ></img>
           </div>
         </div>
         <div className="flex gap-2 justify-start">
           {/* Reset entries */}
-          <Button variant="destructive"
-            onClick={resetItems}
-          >
+          <Button variant="destructive" onClick={resetItems}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -131,10 +135,7 @@ function Content() {
             </svg>
           </Button>
           {/* export state */}
-          <Button
-            variant="outline"
-            onClick={exportState}
-          >
+          <Button variant="outline" onClick={exportState}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -151,10 +152,7 @@ function Content() {
             </svg>
           </Button>
           {/* import state */}
-          <Button
-            variant="outline"
-            onClick={() => setImporting(true)}
-          >
+          <Button variant="outline" onClick={() => setImporting(true)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -174,7 +172,8 @@ function Content() {
 
         <QuickAdds entries={items} addEntry={addItem} />
 
-        <form className="flex gap-2 items-center"
+        <form
+          className="flex gap-2 items-center"
           onSubmit={(e) => {
             e.preventDefault();
             addItem(newText);
@@ -213,10 +212,6 @@ function Content() {
       <Footer />
     </div>
   );
-}
-
-function App() {
-  return <Content />;
 }
 
 export default App;
