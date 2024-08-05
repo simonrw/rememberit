@@ -1,4 +1,5 @@
 import { Item } from "../types/item";
+import { TableCell } from "./ui/table";
 
 type ReadOnlyEntryProps = {
   item: Item;
@@ -8,21 +9,22 @@ type ReadOnlyEntryProps = {
 
 export function ReadOnlyEntry(props: ReadOnlyEntryProps) {
   return (
-    <div
+    <TableCell
       key={props.item.id}
       className="py-2 flex gap-2 justify-between"
       onClick={() => {
-        props.toggleEditing()
+        props.toggleEditing();
       }}
     >
       <div className="flex gap-2">
-        <div className="text-gray-500 font-light">
-          {props.item.created}
-        </div>
+        <div className="text-gray-500 font-light">{props.item.created}</div>
         <div>{props.item.content}</div>
       </div>
       <div>
-        <button onClick={() => props.deleteFn(props.item.id)} className="text-red-400">
+        <button
+          onClick={() => props.deleteFn(props.item.id)}
+          className="text-red-400"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -39,7 +41,6 @@ export function ReadOnlyEntry(props: ReadOnlyEntryProps) {
           </svg>
         </button>
       </div>
-    </div>
+    </TableCell>
   );
 }
-

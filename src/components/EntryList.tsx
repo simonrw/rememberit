@@ -1,6 +1,7 @@
 import { Item } from "../types/item";
 import { Entry } from "./Entry";
 import { ScrollArea } from "./ui/scroll-area";
+import { Table, TableBody } from "./ui/table";
 
 export interface EntryListProps {
   items: Item[];
@@ -12,11 +13,22 @@ export function EntryList(props: EntryListProps) {
   const sortedEntries = [...props.items].sort(sortEntry);
   return (
     <ScrollArea>
-      <div className="flex flex-col">
-        {sortedEntries.map((item) => {
-          return <Entry key={item.id} item={item} deleteFn={props.deleteFn} updateFn={props.updateFn} />
-        })}
-      </div>
+      {/* <div className="flex flex-col">
+      </div> */}
+      <Table>
+        <TableBody>
+          {sortedEntries.map((item) => {
+            return (
+              <Entry
+                key={item.id}
+                item={item}
+                deleteFn={props.deleteFn}
+                updateFn={props.updateFn}
+              />
+            );
+          })}
+        </TableBody>
+      </Table>
     </ScrollArea>
   );
 }
@@ -27,4 +39,4 @@ const sortEntry = (a: Item, b: Item): number => {
   } else {
     return a.created > b.created ? -1 : 1;
   }
-}
+};

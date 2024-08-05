@@ -2,13 +2,13 @@ import { useState } from "react";
 import { EditingEntry } from "./EditingEntry";
 import { Item } from "../types/item";
 import { ReadOnlyEntry } from "./ReadOnlyEntry";
+import { TableRow } from "./ui/table";
 
 export interface EntryProps {
   item: Item;
   deleteFn: (id: string) => void;
   updateFn: (id: string, content: string, created: string) => void;
 }
-
 
 export function Entry(props: EntryProps) {
   const [editing, setEditing] = useState(false);
@@ -30,8 +30,8 @@ export function Entry(props: EntryProps) {
     setEditing(false);
   };
 
-  if (editing) {
-    return <EditingEntry
+  const widget = editing ? (
+    <EditingEntry
       item={props.item}
       newContent={newContent}
       setNewContent={setNewContent}
@@ -39,14 +39,14 @@ export function Entry(props: EntryProps) {
       setNewDate={setNewDate}
       cancelEditing={cancelEditing}
       finishEditing={finishEditing}
-    />;
-  } else {
-    return <ReadOnlyEntry
+    />
+  ) : (
+    <ReadOnlyEntry
       item={props.item}
       deleteFn={props.deleteFn}
       toggleEditing={toggleEditing}
     />
-  }
+  );
+
+  return <TableRow>{widget}</TableRow>;
 }
-
-
