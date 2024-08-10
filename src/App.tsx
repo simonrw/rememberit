@@ -11,7 +11,8 @@ import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import moment, { Moment } from "moment";
 import { toast } from "sonner";
-import { CirclePlus, Download, Trash2, Upload } from "lucide-react";
+import { CirclePlus, Download, Upload } from "lucide-react";
+import { ResetItems } from "./components/ResetItems";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -132,9 +133,7 @@ function App() {
         </div>
         <div className="flex justify-start gap-2">
           {/* Reset entries */}
-          <Button variant="destructive" onClick={resetItems}>
-            <Trash2 />
-          </Button>
+          <ResetItems items={items} resetItems={resetItems} />
           {/* export state */}
           <Button variant="outline" onClick={exportState}>
             <Download />
