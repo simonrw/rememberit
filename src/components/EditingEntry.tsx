@@ -1,3 +1,4 @@
+import { formatDate } from "@/date";
 import { Item } from "../types/item";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -7,8 +8,8 @@ type EditingEntryProps = {
   item: Item;
   newContent: string;
   setNewContent: (newContent: string) => void;
-  newDate: string;
-  setNewDate: (newDate: string) => void;
+  newDate: Date;
+  setNewDate: (newDate: Date) => void;
   cancelEditing: () => void;
   finishEditing: () => void;
 };
@@ -22,8 +23,8 @@ export function EditingEntry(props: EditingEntryProps) {
       >
         <p className="text-lg md:text-sm">Edit item</p>
         <Input
-          value={props.newDate}
-          onChange={(e) => props.setNewDate(e.currentTarget.value)}
+          value={formatDate(props.newDate)}
+          onChange={(e) => props.setNewDate(new Date(e.currentTarget.value))}
           aria-label="Date and time"
           type="datetime-local"
         />

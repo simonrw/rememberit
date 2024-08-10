@@ -7,7 +7,7 @@ import { TableRow } from "./ui/table";
 export interface EntryProps {
   item: Item;
   deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: string) => void;
+  updateFn: (id: string, content: string, created: Date) => void;
 }
 
 export function Entry(props: EntryProps) {

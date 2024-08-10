@@ -6,7 +6,7 @@ import { Table, TableBody } from "./ui/table";
 export interface EntryListProps {
   items: Item[];
   deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: string) => void;
+  updateFn: (id: string, content: string, created: Date) => void;
 }
 
 export function EntryList(props: EntryListProps) {

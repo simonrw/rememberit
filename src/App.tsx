@@ -13,9 +13,30 @@ import { useToast } from "./components/ui/use-toast";
 
 const STORAGE_ITEM_KEY = "entries";
 
+type SerialisedItem = {
+  id: string;
+  content: string;
+  created: string;
+};
+
+const deserialise = (serialized: string): Item[] => {
+  return JSON.parse(serialized).map((item: SerialisedItem) => {
+    return {
+      id: item.id,
+      content: item.content,
+      created: new Date(item.created),
+    };
+  });
+};
+
 const fetchState = (): Item[] => {
   const serialized = localStorage.getItem(STORAGE_ITEM_KEY);
-  return serialized === null ? [] : JSON.parse(serialized);
+  return serialized === null ? [] : deserialise(serialized);
+};
+
+const persistState = (updatedItems: Item[]) => {
+  const serialized = JSON.stringify(updatedItems);
+  localStorage.setItem(STORAGE_ITEM_KEY, serialized);
 };
 
 function App() {
@@ -24,11 +45,6 @@ function App() {
   const [importing, setImporting] = useState(false);
 
   const { toast } = useToast();
-
-  const persistState = (updatedItems: Item[]) => {
-    const serialized = JSON.stringify(updatedItems);
-    localStorage.setItem(STORAGE_ITEM_KEY, serialized);
-  };
 
   const resetItems = () => {
     setItems([]);
@@ -61,7 +77,7 @@ function App() {
     toast({ variant: "destructive", description: "Item deleted" });
   };
 
-  const updateItem = (id: string, content: string, created: string): void => {
+  const updateItem = (id: string, content: string, created: Date): void => {
     setItems((oldItems) => {
       const newItems = oldItems.map((item) => {
         if (item.id === id) {
