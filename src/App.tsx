@@ -102,21 +102,21 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
-      <main className="flex flex-col gap-4 p-4 w-screen flex-1 overflow-y-auto text-lg md:text-base">
+    <div className="flex h-screen flex-col">
+      <main className="flex w-screen flex-1 flex-col gap-4 overflow-y-auto p-4 text-lg md:text-base">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl md:text-2xl font-bold leading-tight tracking-tight">
+          <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-2xl">
             RememberIt
           </h1>
           <div className="flex">
             <ModeToggle />
             <img
               src="icons/remembering.png"
-              className="w-8 bg-white rounded-full p-1"
+              className="w-8 rounded-full bg-white p-1"
             ></img>
           </div>
         </div>
-        <div className="flex gap-2 justify-start">
+        <div className="flex justify-start gap-2">
           {/* Reset entries */}
           <Button variant="destructive" onClick={resetItems}>
             <svg
@@ -173,7 +173,7 @@ function App() {
         <QuickAdds entries={items} addEntry={addItem} />
 
         <form
-          className="flex gap-2 items-center"
+          className="flex items-center gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             addItem(newText);

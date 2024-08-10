@@ -18,7 +18,7 @@ export function EditingEntry(props: EditingEntryProps) {
     <TableCell>
       <div
         key={props.item.id}
-        className="py-4 px-2 space-y-2 flex flex-col gap-2 border border-sky-300 rounded-lg"
+        className="flex flex-col gap-2 space-y-2 rounded-lg border border-sky-300 px-2 py-4"
       >
         <p className="text-sm">Edit item</p>
         <Input
