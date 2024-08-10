@@ -11,13 +11,13 @@ export function ReadOnlyEntry(props: ReadOnlyEntryProps) {
   return (
     <TableCell
       key={props.item.id}
-      className="py-2 flex gap-2 justify-between"
+      className="flex justify-between gap-2 py-2"
       onClick={() => {
         props.toggleEditing();
       }}
     >
-      <div className="flex gap-2">
-        <div className="text-gray-500 font-light">{props.item.created}</div>
+      <div className="flex gap-2 text-lg md:text-sm">
+        <div className="font-light text-gray-500">{props.item.created}</div>
         <div>{props.item.content}</div>
       </div>
       <div>

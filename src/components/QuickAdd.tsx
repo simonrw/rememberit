@@ -14,7 +14,8 @@ export default function QuickAdd(props: QuickAddProps) {
     <Badge
       variant="secondary"
       className="cursor-pointer"
-      onClick={() => props.addEntry(props.content)}>
+      onClick={() => props.addEntry(props.content)}
+    >
       {props.content}
     </Badge>
   );

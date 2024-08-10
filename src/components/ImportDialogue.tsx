@@ -17,8 +17,8 @@ export function ImportDialogue(props: ImportDialogueProps) {
   };
 
   return (
-    <div className="h-screen flex flex-col">
-      <main className="flex flex-col gap-4 p-4 w-screen flex-1 overflow-y-auto text-lg md:text-base">
+    <div className="flex h-screen flex-col">
+      <main className="flex w-screen flex-1 flex-col gap-4 overflow-y-auto p-4 text-lg md:text-base">
         <h2>Import state</h2>
         <input
           className="text-black"
