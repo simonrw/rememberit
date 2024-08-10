@@ -16,6 +16,7 @@ type EditingEntryProps = {
 };
 
 export function EditingEntry(props: EditingEntryProps) {
+  const dateForInput = props.newDate.toISOString().slice(0, -1);
   return (
     <TableCell>
       <div
@@ -24,7 +25,7 @@ export function EditingEntry(props: EditingEntryProps) {
       >
         <p className="text-lg md:text-sm">Edit item</p>
         <Input
-          value={formatDate(props.newDate)}
+          value={dateForInput}
           onChange={(e) => props.setNewDate(moment(e.currentTarget.value))}
           aria-label="Date and time"
           type="datetime-local"
