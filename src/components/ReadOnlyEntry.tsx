@@ -16,7 +16,7 @@ export function ReadOnlyEntry(props: ReadOnlyEntryProps) {
         props.toggleEditing();
       }}
     >
-      <div className="flex gap-2">
+      <div className="flex gap-2 text-lg md:text-sm">
         <div className="font-light text-gray-500">{props.item.created}</div>
         <div>{props.item.content}</div>
       </div>
