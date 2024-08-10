@@ -1,6 +1,8 @@
 import { formatDate } from "@/date";
 import { Item } from "../types/item";
 import { TableCell } from "./ui/table";
+import { Button } from "./ui/button";
+import { Delete } from "lucide-react";
 
 type ReadOnlyEntryProps = {
   item: Item;
@@ -12,7 +14,7 @@ export function ReadOnlyEntry(props: ReadOnlyEntryProps) {
   return (
     <TableCell
       key={props.item.id}
-      className="flex justify-between gap-2 py-2"
+      className="flex items-center justify-between gap-2 py-2"
       onClick={() => {
         props.toggleEditing();
       }}
@@ -24,25 +26,13 @@ export function ReadOnlyEntry(props: ReadOnlyEntryProps) {
         <div>{props.item.content}</div>
       </div>
       <div>
-        <button
+        <Button
           onClick={() => props.deleteFn(props.item.id)}
           className="text-red-400"
+          variant="ghost"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-            />
-          </svg>
-        </button>
+          <Delete />
+        </Button>
       </div>
     </TableCell>
   );
