@@ -10,6 +10,7 @@ import { ModeToggle } from "./components/mode-toggle";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { useToast } from "./components/ui/use-toast";
+import moment, { Moment } from "moment";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -24,7 +25,7 @@ const deserialise = (serialized: string): Item[] => {
     return {
       id: item.id,
       content: item.content,
-      created: new Date(item.created),
+      created: moment(item.created),
     };
   });
 };
@@ -77,7 +78,7 @@ function App() {
     toast({ variant: "destructive", description: "Item deleted" });
   };
 
-  const updateItem = (id: string, content: string, created: Date): void => {
+  const updateItem = (id: string, content: string, created: Moment): void => {
     setItems((oldItems) => {
       const newItems = oldItems.map((item) => {
         if (item.id === id) {

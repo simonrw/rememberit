@@ -3,13 +3,14 @@ import { Item } from "../types/item";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { TableCell } from "./ui/table";
+import moment, { Moment } from "moment";
 
 type EditingEntryProps = {
   item: Item;
   newContent: string;
   setNewContent: (newContent: string) => void;
-  newDate: Date;
-  setNewDate: (newDate: Date) => void;
+  newDate: Moment;
+  setNewDate: (newDate: Moment) => void;
   cancelEditing: () => void;
   finishEditing: () => void;
 };
@@ -24,7 +25,7 @@ export function EditingEntry(props: EditingEntryProps) {
         <p className="text-lg md:text-sm">Edit item</p>
         <Input
           value={formatDate(props.newDate)}
-          onChange={(e) => props.setNewDate(new Date(e.currentTarget.value))}
+          onChange={(e) => props.setNewDate(moment(e.currentTarget.value))}
           aria-label="Date and time"
           type="datetime-local"
         />
