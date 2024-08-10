@@ -3,11 +3,12 @@ import { EditingEntry } from "./EditingEntry";
 import { Item } from "../types/item";
 import { ReadOnlyEntry } from "./ReadOnlyEntry";
 import { TableRow } from "./ui/table";
+import { Moment } from "moment";
 
 export interface EntryProps {
   item: Item;
   deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: string) => void;
+  updateFn: (id: string, content: string, created: Moment) => void;
 }
 
 export function Entry(props: EntryProps) {

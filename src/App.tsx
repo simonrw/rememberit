@@ -10,12 +10,34 @@ import { ModeToggle } from "./components/mode-toggle";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { useToast } from "./components/ui/use-toast";
+import moment, { Moment } from "moment";
 
 const STORAGE_ITEM_KEY = "entries";
 
+type SerialisedItem = {
+  id: string;
+  content: string;
+  created: string;
+};
+
+const deserialise = (serialized: string): Item[] => {
+  return JSON.parse(serialized).map((item: SerialisedItem) => {
+    return {
+      id: item.id,
+      content: item.content,
+      created: moment(item.created),
+    };
+  });
+};
+
 const fetchState = (): Item[] => {
   const serialized = localStorage.getItem(STORAGE_ITEM_KEY);
-  return serialized === null ? [] : JSON.parse(serialized);
+  return serialized === null ? [] : deserialise(serialized);
+};
+
+const persistState = (updatedItems: Item[]) => {
+  const serialized = JSON.stringify(updatedItems);
+  localStorage.setItem(STORAGE_ITEM_KEY, serialized);
 };
 
 function App() {
@@ -24,11 +46,6 @@ function App() {
   const [importing, setImporting] = useState(false);
 
   const { toast } = useToast();
-
-  const persistState = (updatedItems: Item[]) => {
-    const serialized = JSON.stringify(updatedItems);
-    localStorage.setItem(STORAGE_ITEM_KEY, serialized);
-  };
 
   const resetItems = () => {
     setItems([]);
@@ -61,7 +78,7 @@ function App() {
     toast({ variant: "destructive", description: "Item deleted" });
   };
 
-  const updateItem = (id: string, content: string, created: string): void => {
+  const updateItem = (id: string, content: string, created: Moment): void => {
     setItems((oldItems) => {
       const newItems = oldItems.map((item) => {
         if (item.id === id) {

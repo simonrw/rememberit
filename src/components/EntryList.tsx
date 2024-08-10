@@ -1,3 +1,4 @@
+import { Moment } from "moment";
 import { Item } from "../types/item";
 import { Entry } from "./Entry";
 import { ScrollArea } from "./ui/scroll-area";
@@ -6,7 +7,7 @@ import { Table, TableBody } from "./ui/table";
 export interface EntryListProps {
   items: Item[];
   deleteFn: (id: string) => void;
-  updateFn: (id: string, content: string, created: string) => void;
+  updateFn: (id: string, content: string, created: Moment) => void;
 }
 
 export function EntryList(props: EntryListProps) {

@@ -1,19 +1,22 @@
+import { formatDate } from "@/date";
 import { Item } from "../types/item";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { TableCell } from "./ui/table";
+import moment, { Moment } from "moment";
 
 type EditingEntryProps = {
   item: Item;
   newContent: string;
   setNewContent: (newContent: string) => void;
-  newDate: string;
-  setNewDate: (newDate: string) => void;
+  newDate: Moment;
+  setNewDate: (newDate: Moment) => void;
   cancelEditing: () => void;
   finishEditing: () => void;
 };
 
 export function EditingEntry(props: EditingEntryProps) {
+  const dateForInput = props.newDate.toISOString().slice(0, -1);
   return (
     <TableCell>
       <div
@@ -22,8 +25,8 @@ export function EditingEntry(props: EditingEntryProps) {
       >
         <p className="text-lg md:text-sm">Edit item</p>
         <Input
-          value={props.newDate}
-          onChange={(e) => props.setNewDate(e.currentTarget.value)}
+          value={dateForInput}
+          onChange={(e) => props.setNewDate(moment(e.currentTarget.value))}
           aria-label="Date and time"
           type="datetime-local"
         />
