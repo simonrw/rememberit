@@ -4,6 +4,7 @@ import { Input } from "./ui/input";
 import { TableCell } from "./ui/table";
 import moment, { Moment } from "moment";
 import { CircleCheck, CircleX } from "lucide-react";
+import { momentToDatePicker } from "@/lib/utils";
 
 type EditingEntryProps = {
   item: Item;
@@ -16,7 +17,7 @@ type EditingEntryProps = {
 };
 
 export function EditingEntry(props: EditingEntryProps) {
-  const dateForInput = props.newDate.toISOString().slice(0, -1);
+  const dateForInput = momentToDatePicker(props.newDate);
   return (
     <TableCell>
       <div
