@@ -3,17 +3,14 @@ import { useState } from "react";
 import { EntryList } from "./components/EntryList";
 import QuickAdds from "./components/QuickAdds";
 import { newDate } from "./date";
-import { Footer } from "./components/Footer";
 import { Item } from "./types/item";
 import { ImportDialogue } from "./components/ImportDialogue";
-import { ModeToggle } from "./components/mode-toggle";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import moment, { Moment } from "moment";
 import { toast } from "sonner";
 import { CirclePlus, Download, Upload } from "lucide-react";
 import { ResetItems } from "./components/ResetItems";
-import { ProfileMenu } from "./components/ProfileMenu";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -118,58 +115,46 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen flex-col">
-      <main className="flex w-screen flex-1 flex-col gap-4 overflow-y-auto p-4 text-lg md:text-base">
-        <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-2xl">
-            RememberIt
-          </h1>
-          <div className="flex">
-            <ModeToggle />
-            <ProfileMenu />
-          </div>
-        </div>
-        <div className="flex justify-start gap-2">
-          {/* Reset entries */}
-          <ResetItems items={items} resetItems={resetItems} />
-          {/* export state */}
-          <Button variant="outline" onClick={exportState}>
-            <Download />
-          </Button>
-          {/* import state */}
-          <Button variant="outline" onClick={() => setImporting(true)}>
-            <Upload />
-          </Button>
-        </div>
+    <>
+      <div className="flex justify-start gap-2">
+        {/* Reset entries */}
+        <ResetItems items={items} resetItems={resetItems} />
+        {/* export state */}
+        <Button variant="outline" onClick={exportState}>
+          <Download />
+        </Button>
+        {/* import state */}
+        <Button variant="outline" onClick={() => setImporting(true)}>
+          <Upload />
+        </Button>
+      </div>
 
-        <QuickAdds entries={items} addEntry={addItem} />
+      <QuickAdds entries={items} addEntry={addItem} />
 
-        <form
-          className="flex items-center gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            addItem(newText);
-            setNewText("");
+      <form
+        className="flex items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          addItem(newText);
+          setNewText("");
+        }}
+      >
+        <Input
+          placeholder="What would you like to remember?"
+          type="text"
+          id="entry-input"
+          value={newText}
+          autoFocus={true}
+          onChange={(e) => {
+            setNewText(e.target.value);
           }}
-        >
-          <Input
-            placeholder="What would you like to remember?"
-            type="text"
-            id="entry-input"
-            value={newText}
-            autoFocus={true}
-            onChange={(e) => {
-              setNewText(e.target.value);
-            }}
-          ></Input>
-          <Button>
-            <CirclePlus />
-          </Button>
-        </form>
-        <EntryList items={items} deleteFn={deleteItem} updateFn={updateItem} />
-      </main>
-      <Footer />
-    </div>
+        ></Input>
+        <Button>
+          <CirclePlus />
+        </Button>
+      </form>
+      <EntryList items={items} deleteFn={deleteItem} updateFn={updateItem} />
+    </>
   );
 }
 
