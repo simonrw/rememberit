@@ -13,6 +13,7 @@ import moment, { Moment } from "moment";
 import { toast } from "sonner";
 import { CirclePlus, Download, Upload } from "lucide-react";
 import { ResetItems } from "./components/ResetItems";
+import { ProfileMenu } from "./components/ProfileMenu";
 
 const STORAGE_ITEM_KEY = "entries";
 
@@ -125,10 +126,7 @@ function App() {
           </h1>
           <div className="flex">
             <ModeToggle />
-            <img
-              src="icons/remembering.png"
-              className="w-8 rounded-full bg-white p-1"
-            ></img>
+            <ProfileMenu />
           </div>
         </div>
         <div className="flex justify-start gap-2">
