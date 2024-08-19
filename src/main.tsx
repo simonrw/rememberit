@@ -6,6 +6,7 @@ import { ThemeProvider } from "./components/theme-provider.tsx";
 import { Toaster } from "@/components/ui/sonner";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from "./routes/root.tsx";
+import { Settings } from "./routes/settings.tsx";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <App />,
+      },
+      {
+        path: "/settings",
+        element: <Settings />,
       },
     ],
   },
