@@ -1,9 +1,11 @@
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
-type ProfileMenuProps = {
-};
-
-export const ProfileMenu = (props: ProfileMenuProps) => {
+export const ProfileMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>

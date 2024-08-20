@@ -3,7 +3,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { Outlet } from "react-router-dom";
 
-const Root = (props) => {
+const Root = () => {
   return (
     <div className="flex h-screen flex-col">
       <main className="flex w-screen flex-1 flex-col gap-4 overflow-y-auto p-4 text-lg md:text-base">
