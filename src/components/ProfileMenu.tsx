@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,9 @@ export const ProfileMenu = () => {
         ></img>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>Settings</DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link to="/settings">Settings</Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
