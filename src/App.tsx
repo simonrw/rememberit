@@ -57,7 +57,7 @@ function App() {
       return;
     }
 
-    const newItem: Item = { content, id: uuidv4(), created: newDate() };
+    const newItem: Item = { content: content.trim(), id: uuidv4(), created: newDate() };
     setItems((oldItems) => {
       const newItems = [...oldItems, newItem];
       persistState(newItems);
