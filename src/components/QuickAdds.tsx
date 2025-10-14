@@ -45,6 +45,10 @@ export default function QuickAdds(props: QuickAddsProps) {
   if (quickAddItems.length === 0) {
     return <></>;
   } else {
-    return <div className="flex flex-row gap-2">{quickAddComponents}</div>;
+    return (
+      <div className="flex flex-row gap-2 overflow-x-auto">
+        {quickAddComponents}
+      </div>
+    );
   }
 }
